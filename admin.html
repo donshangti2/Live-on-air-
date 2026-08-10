@@ -1,1 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Kulzzy Radio - Live Community Admin</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #06152f;
+      color: #ffffff;
+      font-family: Arial, Helvetica, sans-serif;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    /* LOGIN */
+
+    .login-box {
+      max-width: 420px;
+      margin: 70px auto;
+      background: #0b2144;
+      padding: 30px 24px;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,.35);
+    }
+
+    .logo-title {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .logo-title h1 {
+      font-size: 27px;
+      margin-bottom: 8px;
+    }
+
+    .gold {
+      color: #ffd21c;
+    }
+
+    .logo-title p {
+      color: #aebed5;
+      font-size: 13px;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 7px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 11px;
+      border: 1px solid #38547d;
+      background: #071936;
+      color: #ffffff;
+      outline: none;
+      font-size: 15px;
+    }
+
+    .input-group input:focus {
+      border-color: #ffd21c;
+    }
+
+    .login-button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 11px;
+      background: #ffd21c;
+      color: #06152f;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .login-button:disabled {
+      opacity: .6;
+    }
+
+    /* ADMIN PANEL */
+
+    .admin-panel {
+      display: none;
+    }
+
+    .top-bar {
+      background: #0b2144;
+      padding: 18px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 18px;
+    }
+
+    .top-title h1 {
+      font-size: 23px;
+    }
+
+    .top-title p {
+      color: #aebed5;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .logout-button {
+      border: 1px solid #526a8d;
+      background: transparent;
+      color: #ffffff;
+      border-radius: 9px;
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+
+    /* LIVE CONTROL */
+
+    .control-box {
+      background: #0b2144;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .control-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 13px;
+    }
+
+    .control-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .control-button {
+      min-height: 65px;
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .general-mute {
+      background: #d90000;
+      color: #ffffff;
+    }
+
+    .allow-one {
+      background: #ffd21c;
+      color: #06152f;
+    }
+
+    .control-button.active {
+      outline: 3px solid #ffffff;
+      outline-offset: 2px;
+    }
+
+    /* STATUS */
+
+    .message {
+      background: #071936;
+      border: 1px solid #38547d;
+      border-radius: 12px;
+      padding: 13px;
+      font-size: 13px;
+      color: #c8d3e5;
+      margin-bottom: 18px;
+    }
+
+    /* CALLERS */
+
+    .callers-box {
+      background: #0b2144;
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .callers-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .callers-header h2 {
+      font-size: 18px;
+    }
+
+    .caller-count {
+      background: #ffd21c;
+      color: #06152f;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 6px 10px;
+      border-radius: 20px;
+    }
+
+    .caller-card {
+      background: #071936;
+      border: 1px solid #304c73;
+      border-radius: 14px;
+      padding: 15px;
+      margin-bottom: 12px;
+    }
+
+    .caller-information {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 13px;
+    }
+
+    .caller-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: #102e58;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 21px;
+    }
+
+    .caller-phone {
+      font-size: 17px;
+      font-weight: bold;
+    }
+
+    .caller-status {
+      margin-top: 5px;
+      font-size: 12px;
+      color: #aebed5;
+    }
+
+    .caller-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .caller-controls button {
+      border: none;
+      border-radius: 9px;
+      padding: 11px 6px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .allow-button {
+      background: #168b45;
+      color: #ffffff;
+    }
+
+    .mute-button {
+      background: #455a75;
+      color: #ffffff;
+    }
+
+    .disconnect-button {
+      background: #a90000;
+      color: #ffffff;
+    }
+
+    .empty-callers {
+      text-align: center;
+      padding: 35px 15px;
+      color: #8295b2;
+      font-size: 14px;
+    }
+
+    .error-message {
+      color: #ff8d8d;
+      font-size: 13px;
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+
+      body {
+        padding: 12px;
+      }
+
+      .control-buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .caller-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .top-bar {
+        align-items: flex-start;
+      }
+
+      .top-title h1 {
+        font-size: 19px;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- ========================================= -->
+    <!-- ADMIN LOGIN -->
+    <!-- ========================================= -->
+
+    <section class="login-box" id="loginBox">
+
+      <div class="logo-title">
+
+        <h1>
+          Kulzzy <span class="gold">Radio</span>
+        </h1>
+
+        <p>
+          Live Community Control Panel
+        </p>
+
+      </div>
+
+
+      <div class="input-group">
+
+        <label for="adminEmail">
+          Admin Email
+        </label>
+
+        <input
+          type="email"
+          id="adminEmail"
+          placeholder="Enter admin email"
+          autocomplete="username"
+        >
+
+      </div>
+
+
+      <div class="input-group">
+
+        <label for="adminPassword">
+          Password
+        </label>
+
+        <input
+          type="password"
+          id="adminPassword"
+          placeholder="Enter password"
+          autocomplete="current-password"
+        >
+
+      </div>
+
+
+      <button
+        class="login-button"
+        id="loginButton"
+      >
+        LOGIN
+      </button>
+
+
+      <div
+        class="error-message"
+        id="adminMessage"
+      ></div>
+
+    </section>
+
+
+    <!-- ========================================= -->
+    <!-- ADMIN PANEL -->
+    <!-- ========================================= -->
+
+    <section
+      class="admin-panel"
+      id="adminPanel"
+    >
+
+      <!-- TOP BAR -->
+
+      <div class="top-bar">
+
+        <div class="top-title">
+
+          <h1>
+            🎙️ LIVE COMMUNITY CONTROL
+          </h1>
+
+          <p>
+            Kulzzy Radio Network
+          </p>
+
+        </div>
+
+
+        <button
+          class="logout-button"
+          id="logoutButton"
+        >
+          LOGOUT
+        </button>
+
+      </div>
+
+
+      <!-- CONTROL BOX -->
+
+      <div class="control-box">
+
+        <div class="control-title">
+          🎛️ LIVE MICROPHONE CONTROL
+        </div>
+
+
+        <div class="control-buttons">
+
+          <button
+            class="control-button general-mute active"
+            id="generalMuteButton"
+          >
+            🔇<br>
+            GENERAL MUTE
+          </button>
+
+
+          <button
+            class="control-button allow-one"
+            id="allowOneButton"
+          >
+            🎙️<br>
+            GENERAL MUTE + ALLOW 1 PERSON
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- MESSAGE -->
+
+      <div
+        class="message"
+        id="controlMessage"
+      >
+        🔇 General Mute is active. All callers are muted.
+      </div>
+
+
+      <!-- CALLERS -->
+
+      <div class="callers-box">
+
+        <div class="callers-header">
+
+          <h2>
+            📱 LIVE CALLERS
+          </h2>
+
+          <span
+            class="caller-count"
+            id="callerCount"
+          >
+            0
+          </span>
+
+        </div>
+
+
+        <div id="callersList">
+
+          <div class="empty-callers">
+            No callers connected.
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- ADMIN JAVASCRIPT -->
+  <!-- ========================================= -->
+
+  <script type="module">
+
+    import "./js/admin.js";
+
+
+    /*
+     * Connect the message element used by admin.js
+     */
+
+    const message =
+      document.getElementById("controlMessage");
+
+    const originalMessage =
+      document.getElementById("adminMessage");
+
+
+    /*
+     * admin.js currently uses #adminMessage
+     * for login messages.
+     *
+     * This keeps the panel message synchronized.
+     */
+
+    const observer =
+      new MutationObserver(() => {
+
+        if (
+          originalMessage &&
+          originalMessage.textContent
+        ) {
+
+          message.textContent =
+            originalMessage.textContent;
+
+        }
+
+      });
+
+
+    if (originalMessage) {
+
+      observer.observe(
+        originalMessage,
+        {
+          childList: true,
+          characterData: true,
+          subtree: true
+        }
+      );
+
+    }
+
+
+    /*
+     * Update caller count
+     */
+
+    const callersList =
+      document.getElementById("callersList");
+
+    const callerCount =
+      document.getElementById("callerCount");
+
+
+    const countObserver =
+      new MutationObserver(() => {
+
+        const cards =
+          callersList.querySelectorAll(
+            ".caller-card"
+          );
+
+        callerCount.textContent =
+          cards.length;
+
+      });
+
+
+    countObserver.observe(
+      callersList,
+      {
+        childList: true,
+        subtree: true
+      }
+    );
+
+  </script>
+
+</body> 
+</html>
