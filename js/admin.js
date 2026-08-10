@@ -1,5 +1,5 @@
 // Kulzzy Radio Live Community
-// Admin Control System
+// Admin Control Panel
 
 import { auth, db } from "./firebase.js";
 
@@ -12,20 +12,19 @@ import {
 import {
   ref,
   onValue,
-  update,
-  remove
+  update
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
 
 // ======================================================
-// ADMIN SETTINGS
+// YOUR ADMIN EMAIL
 // ======================================================
 
 const ADMIN_EMAIL = "dstnewz.ng@gmail.com";
 
 
 // ======================================================
-// ELEMENTS
+// PAGE ELEMENTS
 // ======================================================
 
 const loginBox = document.getElementById("loginBox");
@@ -48,6 +47,12 @@ const allowOneButton =
 const adminMessage =
   document.getElementById("adminMessage");
 
+const controlMessage =
+  document.getElementById("controlMessage");
+
+const callerCount =
+  document.getElementById("callerCount");
+
 
 // ======================================================
 // VARIABLES
@@ -63,14 +68,18 @@ let selectedCaller = null;
 
 
 // ======================================================
-// HELPER
+// MESSAGE
 // ======================================================
 
 function showMessage(message) {
 
-  if (!adminMessage) return;
+  if (adminMessage) {
+    adminMessage.textContent = message;
+  }
 
-  adminMessage.textContent = message;
+  if (controlMessage) {
+    controlMessage.textContent = message;
+  }
 
 }
 
@@ -84,25 +93,36 @@ if (loginButton) {
   loginButton.addEventListener("click", async () => {
 
     const email = emailInput.value.trim();
-
     const password = passwordInput.value;
 
 
     if (!email || !password) {
 
-      showMessage("Enter your admin email and password.");
+      showMessage(
+        "Please enter your admin email and password."
+      );
 
       return;
 
     }
 
 
+    if (email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+
+      showMessage(
+        "This email is not authorized."
+      );
+
+      return;
+
+    }
+
+
+    loginButton.disabled = true;
+    loginButton.textContent = "LOGGING IN...";
+
+
     try {
-
-      loginButton.disabled = true;
-
-      loginButton.textContent = "LOGGING IN...";
-
 
       await signInWithEmailAndPassword(
         auth,
@@ -110,24 +130,23 @@ if (loginButton) {
         password
       );
 
-
-      showMessage("Login successful.");
+      showMessage(
+        "Login successful."
+      );
 
     } catch (error) {
 
-      console.error(error);
+      console.error("Login error:", error);
 
       showMessage(
         "Login failed. Check your email and password."
       );
 
-    } finally {
-
-      loginButton.disabled = false;
-
-      loginButton.textContent = "LOGIN";
-
     }
+
+
+    loginButton.disabled = false;
+    loginButton.textContent = "LOGIN";
 
   });
 
@@ -135,7 +154,7 @@ if (loginButton) {
 
 
 // ======================================================
-// AUTHENTICATION STATE
+// AUTH STATE
 // ======================================================
 
 onAuthStateChanged(auth, (user) => {
@@ -155,18 +174,17 @@ onAuthStateChanged(auth, (user) => {
   }
 
 
-  /*
-   * IMPORTANT:
-   * Only your designated admin email should be allowed
-   * to use this panel.
-   */
+  // Make sure only your admin email can use the panel
 
   if (
-    ADMIN_EMAIL !== "YOUR_ADMIN_EMAIL_HERE" &&
-    user.email !== ADMIN_EMAIL
+    !user.email ||
+    user.email.toLowerCase() !==
+    ADMIN_EMAIL.toLowerCase()
   ) {
 
-    showMessage("This account is not authorized.");
+    showMessage(
+      "Unauthorized account."
+    );
 
     signOut(auth);
 
@@ -175,14 +193,21 @@ onAuthStateChanged(auth, (user) => {
   }
 
 
+  // Hide login
+
   if (loginBox) {
     loginBox.style.display = "none";
   }
+
+
+  // Show admin panel
 
   if (adminPanel) {
     adminPanel.style.display = "block";
   }
 
+
+  // Start listening for callers
 
   startCallerListener();
 
@@ -201,11 +226,12 @@ if (logoutButton) {
 
       await signOut(auth);
 
-      showMessage("Logged out.");
-
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Logout error:",
+        error
+      );
 
     }
 
@@ -220,18 +246,37 @@ if (logoutButton) {
 
 function startCallerListener() {
 
-  const callersRef = ref(db, "callers");
+  const callersRef =
+    ref(db, "callers");
 
 
-  onValue(callersRef, (snapshot) => {
+  onValue(
+    callersRef,
 
-    const data = snapshot.val() || {};
+    (snapshot) => {
 
-    callers = data;
+      callers =
+        snapshot.val() || {};
 
-    renderCallers();
 
-  });
+      renderCallers();
+
+    },
+
+    (error) => {
+
+      console.error(
+        "Database listener error:",
+        error
+      );
+
+      showMessage(
+        "Unable to read callers from Firebase."
+      );
+
+    }
+
+  );
 
 }
 
@@ -248,15 +293,40 @@ function renderCallers() {
   callersList.innerHTML = "";
 
 
-  const entries = Object.entries(callers);
+  const entries =
+    Object.entries(callers);
 
 
-  if (entries.length === 0) {
+  const onlineCallers =
+    entries.filter(([uid, caller]) => {
+
+      return (
+        caller &&
+        caller.online !== false &&
+        caller.status !== "offline"
+      );
+
+    });
+
+
+  if (callerCount) {
+
+    callerCount.textContent =
+      onlineCallers.length;
+
+  }
+
+
+  if (onlineCallers.length === 0) {
 
     callersList.innerHTML = `
+
       <div class="empty-callers">
-        No callers connected.
+
+        📭 No callers connected.
+
       </div>
+
     `;
 
     return;
@@ -264,93 +334,99 @@ function renderCallers() {
   }
 
 
-  entries.forEach(([uid, caller]) => {
+  onlineCallers.forEach(
+    ([uid, caller]) => {
 
-    if (!caller) return;
-
-    if (caller.online === false) return;
-
-
-    const card = document.createElement("div");
-
-    card.className = "caller-card";
+      const card =
+        document.createElement("div");
 
 
-    const phone = caller.phone || "Unknown";
-
-    const status = caller.status || "waiting";
-
-    const muted = caller.muted === true;
-
-    const allowed =
-      caller.allowedToSpeak === true;
+      card.className =
+        "caller-card";
 
 
-    card.innerHTML = `
+      const phone =
+        caller.phone || "Unknown";
 
-      <div class="caller-information">
 
-        <div class="caller-icon">
-          👤
-        </div>
+      const muted =
+        caller.muted === true;
 
-        <div>
 
-          <div class="caller-phone">
-            ${escapeHTML(phone)}
+      const allowed =
+        caller.allowedToSpeak === true;
+
+
+      card.innerHTML = `
+
+        <div class="caller-information">
+
+          <div class="caller-icon">
+            👤
           </div>
 
-          <div class="caller-status">
+          <div>
 
-            ${getStatusText(
-              status,
-              muted,
-              allowed
-            )}
+            <div class="caller-phone">
+              ${escapeHTML(phone)}
+            </div>
+
+            <div class="caller-status">
+
+              ${getStatus(
+                caller.status,
+                muted,
+                allowed
+              )}
+
+            </div>
 
           </div>
 
         </div>
 
-      </div>
+
+        <div class="caller-controls">
+
+          <button
+            class="allow-button"
+            data-action="allow"
+            data-uid="${uid}"
+          >
+            🎙️ ALLOW
+          </button>
 
 
-      <div class="caller-controls">
-
-        <button
-          class="allow-button"
-          data-action="allow"
-          data-uid="${uid}"
-        >
-          🎙️ ALLOW
-        </button>
-
-
-        <button
-          class="mute-button"
-          data-action="mute"
-          data-uid="${uid}"
-        >
-          ${muted ? "🔊 UNMUTE" : "🔇 MUTE"}
-        </button>
+          <button
+            class="mute-button"
+            data-action="mute"
+            data-uid="${uid}"
+          >
+            ${
+              muted
+                ? "🔊 UNMUTE"
+                : "🔇 MUTE"
+            }
+          </button>
 
 
-        <button
-          class="disconnect-button"
-          data-action="disconnect"
-          data-uid="${uid}"
-        >
-          ❌ DISCONNECT
-        </button>
+          <button
+            class="disconnect-button"
+            data-action="disconnect"
+            data-uid="${uid}"
+          >
+            ❌ DISCONNECT
+          </button>
 
-      </div>
+        </div>
 
-    `;
+      `;
 
 
-    callersList.appendChild(card);
+      callersList.appendChild(card);
 
-  });
+    }
+  );
 
 
   attachCallerButtons();
@@ -359,10 +435,10 @@ function renderCallers() {
 
 
 // ======================================================
-// STATUS TEXT
+// CALLER STATUS
 // ======================================================
 
-function getStatusText(
+function getStatus(
   status,
   muted,
   allowed
@@ -395,7 +471,7 @@ function getStatusText(
 
 
 // ======================================================
-// CALLER BUTTONS
+// BUTTON EVENTS
 // ======================================================
 
 function attachCallerButtons() {
@@ -406,40 +482,45 @@ function attachCallerButtons() {
     );
 
 
-  buttons.forEach((button) => {
+  buttons.forEach(
+    (button) => {
 
-    button.addEventListener("click", async () => {
+      button.addEventListener(
+        "click",
+        async () => {
 
-      const action =
-        button.dataset.action;
+          const action =
+            button.dataset.action;
 
-      const uid =
-        button.dataset.uid;
-
-
-      if (action === "allow") {
-
-        await allowCaller(uid);
-
-      }
+          const uid =
+            button.dataset.uid;
 
 
-      if (action === "mute") {
+          if (action === "allow") {
 
-        await toggleMute(uid);
+            await allowCaller(uid);
 
-      }
+          }
 
 
-      if (action === "disconnect") {
+          if (action === "mute") {
 
-        await disconnectCaller(uid);
+            await toggleMute(uid);
 
-      }
+          }
 
-    });
 
-  });
+          if (action === "disconnect") {
+
+            await disconnectCaller(uid);
+
+          }
+
+        }
+      );
+
+    }
+  );
 
 }
 
@@ -450,10 +531,13 @@ function attachCallerButtons() {
 
 async function allowCaller(uid) {
 
-  if (generalMute && !allowOneMode) {
+  if (
+    generalMute &&
+    !allowOneMode
+  ) {
 
     showMessage(
-      "General Mute is active. Use Allow 1 Person mode first."
+      "GENERAL MUTE is active. Choose ALLOW 1 PERSON first."
     );
 
     return;
@@ -466,32 +550,104 @@ async function allowCaller(uid) {
     selectedCaller = uid;
 
 
-    const callerRef =
-      ref(db, `callers/${uid}`);
+    // In Allow-1 mode, make sure everyone else stays muted
+
+    if (allowOneMode) {
+
+      const updates = {};
 
 
-    await update(callerRef, {
+      Object.keys(callers).forEach(
+        (otherUid) => {
 
-      allowedToSpeak: true,
+          if (
+            otherUid === uid
+          ) return;
 
-      muted: false,
 
-      status: "speaking"
+          const caller =
+            callers[otherUid];
 
-    });
+
+          if (!caller) return;
+
+
+          if (caller.online === false) return;
+
+
+          updates[
+            `callers/${otherUid}/muted`
+          ] = true;
+
+
+          updates[
+            `callers/${otherUid}/allowedToSpeak`
+          ] = false;
+
+
+          updates[
+            `callers/${otherUid}/status`
+          ] = "muted";
+
+        }
+      );
+
+
+      updates[
+        `callers/${uid}/muted`
+      ] = false;
+
+
+      updates[
+        `callers/${uid}/allowedToSpeak`
+      ] = true;
+
+
+      updates[
+        `callers/${uid}/status`
+      ] = "speaking";
+
+
+      await update(
+        ref(db),
+        updates
+      );
+
+    } else {
+
+      await update(
+        ref(
+          db,
+          `callers/${uid}`
+        ),
+        {
+
+          muted: false,
+
+          allowedToSpeak: true,
+
+          status: "speaking"
+
+        }
+      );
+
+    }
 
 
     showMessage(
-      "Caller has been allowed to speak."
+      "🎙️ Caller is now allowed to speak."
     );
 
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Allow caller error:",
+      error
+    );
 
     showMessage(
-      "Unable to allow caller."
+      "Unable to allow this caller."
     );
 
   }
@@ -500,34 +656,38 @@ async function allowCaller(uid) {
 
 
 // ======================================================
-// MUTE / UNMUTE CALLER
+// MUTE / UNMUTE
 // ======================================================
 
 async function toggleMute(uid) {
 
-  const caller = callers[uid];
+  const caller =
+    callers[uid];
 
 
   if (!caller) return;
 
 
-  const currentlyMuted =
+  const isMuted =
     caller.muted === true;
 
 
   try {
 
     await update(
-      ref(db, `callers/${uid}`),
+      ref(
+        db,
+        `callers/${uid}`
+      ),
       {
 
-        muted: !currentlyMuted,
+        muted: !isMuted,
 
         allowedToSpeak:
-          currentlyMuted,
+          isMuted,
 
         status:
-          currentlyMuted
+          isMuted
             ? "speaking"
             : "muted"
 
@@ -536,15 +696,18 @@ async function toggleMute(uid) {
 
 
     showMessage(
-      currentlyMuted
-        ? "Caller microphone allowed."
-        : "Caller muted."
+      isMuted
+        ? "🎙️ Caller microphone allowed."
+        : "🔇 Caller muted."
     );
 
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Mute error:",
+      error
+    );
 
     showMessage(
       "Unable to change microphone status."
@@ -556,7 +719,7 @@ async function toggleMute(uid) {
 
 
 // ======================================================
-// DISCONNECT CALLER
+// DISCONNECT
 // ======================================================
 
 async function disconnectCaller(uid) {
@@ -564,7 +727,10 @@ async function disconnectCaller(uid) {
   try {
 
     await update(
-      ref(db, `callers/${uid}`),
+      ref(
+        db,
+        `callers/${uid}`
+      ),
       {
 
         status: "disconnected",
@@ -580,13 +746,16 @@ async function disconnectCaller(uid) {
 
 
     showMessage(
-      "Caller disconnected."
+      "❌ Caller disconnected."
     );
 
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Disconnect error:",
+      error
+    );
 
     showMessage(
       "Unable to disconnect caller."
@@ -619,33 +788,39 @@ if (generalMuteButton) {
         const updates = {};
 
 
-        Object.keys(callers).forEach((uid) => {
+        Object.keys(callers).forEach(
+          (uid) => {
 
-          const caller = callers[uid];
-
-          if (!caller) return;
-
-          if (caller.online === false) return;
+            const caller =
+              callers[uid];
 
 
-          updates[
-            `callers/${uid}/muted`
-          ] = true;
+            if (!caller) return;
+
+            if (caller.online === false) return;
 
 
-          updates[
-            `callers/${uid}/allowedToSpeak`
-          ] = false;
+            updates[
+              `callers/${uid}/muted`
+            ] = true;
 
 
-          updates[
-            `callers/${uid}/status`
-          ] = "muted";
-
-        });
+            updates[
+              `callers/${uid}/allowedToSpeak`
+            ] = false;
 
 
-        if (Object.keys(updates).length > 0) {
+            updates[
+              `callers/${uid}/status`
+            ] = "muted";
+
+          }
+        );
+
+
+        if (
+          Object.keys(updates).length
+        ) {
 
           await update(
             ref(db),
@@ -655,16 +830,27 @@ if (generalMuteButton) {
         }
 
 
-        showMessage(
-          "GENERAL MUTE activated. Everyone is muted."
+        generalMuteButton.classList.add(
+          "active"
         );
 
 
-        updateControlButtons();
+        allowOneButton.classList.remove(
+          "active"
+        );
+
+
+        showMessage(
+          "🔇 GENERAL MUTE activated. Everyone is muted."
+        );
+
 
       } catch (error) {
 
-        console.error(error);
+        console.error(
+          "General mute error:",
+          error
+        );
 
         showMessage(
           "Unable to activate General Mute."
@@ -679,7 +865,7 @@ if (generalMuteButton) {
 
 
 // ======================================================
-// GENERAL MUTE + ALLOW ONE PERSON
+// GENERAL MUTE + ALLOW ONE
 // ======================================================
 
 if (allowOneButton) {
@@ -688,45 +874,51 @@ if (allowOneButton) {
     "click",
     async () => {
 
-      allowOneMode = true;
-
-      generalMute = true;
-
-      selectedCaller = null;
-
-
       try {
+
+        generalMute = true;
+
+        allowOneMode = true;
+
+        selectedCaller = null;
+
 
         const updates = {};
 
 
-        Object.keys(callers).forEach((uid) => {
+        Object.keys(callers).forEach(
+          (uid) => {
 
-          const caller = callers[uid];
-
-          if (!caller) return;
-
-          if (caller.online === false) return;
+            const caller =
+              callers[uid];
 
 
-          updates[
-            `callers/${uid}/muted`
-          ] = true;
+            if (!caller) return;
+
+            if (caller.online === false) return;
 
 
-          updates[
-            `callers/${uid}/allowedToSpeak`
-          ] = false;
+            updates[
+              `callers/${uid}/muted`
+            ] = true;
 
 
-          updates[
-            `callers/${uid}/status`
-          ] = "muted";
-
-        });
+            updates[
+              `callers/${uid}/allowedToSpeak`
+            ] = false;
 
 
-        if (Object.keys(updates).length > 0) {
+            updates[
+              `callers/${uid}/status`
+            ] = "muted";
+
+          }
+        );
+
+
+        if (
+          Object.keys(updates).length
+        ) {
 
           await update(
             ref(db),
@@ -736,16 +928,27 @@ if (allowOneButton) {
         }
 
 
-        showMessage(
-          "General Mute active. Select ALLOW for one caller."
+        generalMuteButton.classList.remove(
+          "active"
         );
 
 
-        updateControlButtons();
+        allowOneButton.classList.add(
+          "active"
+        );
+
+
+        showMessage(
+          "🔇 Everyone is muted. Select ALLOW for one person."
+        );
+
 
       } catch (error) {
 
-        console.error(error);
+        console.error(
+          "Allow-one error:",
+          error
+        );
 
         showMessage(
           "Unable to activate Allow 1 Person mode."
@@ -760,52 +963,36 @@ if (allowOneButton) {
 
 
 // ======================================================
-// CONTROL BUTTON DISPLAY
-// ======================================================
-
-function updateControlButtons() {
-
-  if (!generalMuteButton) return;
-
-  if (!allowOneButton) return;
-
-
-  if (allowOneMode) {
-
-    allowOneButton.classList.add(
-      "active"
-    );
-
-    generalMuteButton.classList.remove(
-      "active"
-    );
-
-  } else {
-
-    allowOneButton.classList.remove(
-      "active"
-    );
-
-    generalMuteButton.classList.add(
-      "active"
-    );
-
-  }
-
-}
-
-
-// ======================================================
-// SECURITY / HTML ESCAPING
+// HTML SECURITY
 // ======================================================
 
 function escapeHTML(value) {
 
   return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 
-      }
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+
+    .replace(
+      /</g,
+      "&lt;"
+    )
+
+    .replace(
+      />/g,
+      "&gt;"
+    )
+
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
