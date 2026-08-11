@@ -1,381 +1,731 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>Kulzzy Radio - Live Community</title>
 
+
   <style>
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
+
     body {
+
       min-height: 100vh;
+
       background: #001a3a;
+
       color: #ffffff;
-      font-family: Arial, Helvetica, sans-serif;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
       padding: 20px;
+
     }
+
 
     .container {
+
       width: 100%;
+
       max-width: 650px;
+
       margin: auto;
+
     }
+
 
     .community-box {
+
       background: #062b57;
+
       border-radius: 28px;
+
       padding: 40px 30px;
+
       margin: 80px auto 20px;
-      box-shadow: 0 20px 50px rgba(0,0,0,.3);
+
+      box-shadow:
+        0 20px 50px
+        rgba(0,0,0,.3);
+
     }
+
 
     .live-badge {
+
       display: table;
-      margin: 0 auto 35px;
+
+      margin:
+        0 auto 35px;
+
       background: #f30000;
+
       color: #ffffff;
-      padding: 13px 25px;
+
+      padding:
+        13px 25px;
+
       border-radius: 40px;
+
       font-weight: bold;
+
       font-size: 18px;
+
     }
+
 
     .live-dot {
+
       display: inline-block;
+
       width: 15px;
+
       height: 15px;
+
       background: #ffffff;
+
       border-radius: 50%;
+
       margin-right: 10px;
+
     }
+
 
     h1 {
+
       text-align: center;
+
       font-size: 45px;
+
       line-height: 1.1;
+
       margin-bottom: 25px;
+
     }
+
 
     .yellow {
+
       color: #ffd000;
+
     }
+
 
     .description {
+
       text-align: center;
+
       color: #c7d5e8;
+
       font-size: 19px;
+
       line-height: 1.6;
+
       margin-bottom: 35px;
+
     }
+
 
     label {
+
       display: block;
+
       font-weight: bold;
+
       font-size: 16px;
+
       margin-bottom: 10px;
+
     }
+
 
     input {
+
       width: 100%;
+
       padding: 18px;
+
       border-radius: 15px;
-      border: 1px solid #46688f;
+
+      border:
+        1px solid #46688f;
+
       background: #001d40;
+
       color: #ffffff;
+
       font-size: 18px;
+
       outline: none;
+
     }
+
 
     input:focus {
+
       border-color: #ffd000;
+
     }
+
 
     .join-button {
+
       width: 100%;
+
       margin-top: 20px;
+
       padding: 18px;
+
       border: none;
+
       border-radius: 15px;
+
       background: #ffd000;
+
       color: #001a3a;
+
       font-size: 18px;
+
       font-weight: 900;
+
       cursor: pointer;
+
     }
+
 
     .join-button:disabled {
+
       opacity: .6;
+
       cursor: not-allowed;
+
     }
+
 
     .status-box {
+
       margin-top: 25px;
+
       background: #001d40;
-      border: 1px solid #46688f;
+
+      border:
+        1px solid #46688f;
+
       border-radius: 18px;
+
       padding: 30px 20px;
+
       text-align: center;
+
     }
+
 
     .status-icon {
+
       font-size: 55px;
+
       margin-bottom: 12px;
+
     }
+
 
     .status-title {
+
       font-size: 25px;
+
       font-weight: bold;
+
       margin-bottom: 10px;
+
     }
+
 
     .status-text {
+
       color: #c7d5e8;
+
       font-size: 17px;
+
       line-height: 1.5;
+
     }
+
 
     .hidden {
+
       display: none !important;
+
     }
+
 
     .error {
+
       color: #ff8d8d;
+
       margin-top: 15px;
+
       text-align: center;
+
       font-size: 14px;
+
     }
 
+
     .footer {
+
       text-align: center;
+
       color: #8198b7;
+
       font-size: 14px;
+
       margin-top: 30px;
+
     }
+
 
     @media (max-width: 600px) {
 
       body {
+
         padding: 12px;
+
       }
+
 
       .community-box {
+
         margin-top: 40px;
-        padding: 35px 20px;
+
+        padding:
+          35px 20px;
+
       }
+
 
       h1 {
+
         font-size: 38px;
+
       }
+
 
       .description {
+
         font-size: 17px;
+
       }
 
+
       .live-badge {
+
         font-size: 16px;
+
       }
+
     }
+
   </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
+
 
   <main class="community-box">
 
+
     <div class="live-badge">
+
       <span class="live-dot"></span>
+
       LIVE COMMUNITY
+
     </div>
 
+
     <h1>
-      Join <span class="yellow">Kulzzy Radio</span>
+
+      Join
+
+      <span class="yellow">
+        Kulzzy Radio
+      </span>
+
     </h1>
 
+
     <p class="description">
-      Join us live and get the opportunity to speak on-air.
-      Enter your phone number below to join the waiting queue.
+
+      Join us live and get the opportunity
+      to speak on-air.
+      Enter your phone number below
+      to join the waiting queue.
+
     </p>
 
 
-    <!-- PHONE FORM -->
+    <!-- =========================================
+         PHONE FORM
+    ========================================== -->
 
     <div id="joinArea">
 
+
       <label for="phoneNumber">
+
         Your Phone Number
+
       </label>
 
+
       <input
+
         type="tel"
+
         id="phoneNumber"
+
         placeholder="+2349017759411"
+
         autocomplete="tel"
+
       >
+
 
       <button
+
         class="join-button"
+
         id="joinButton"
+
       >
+
         🎙️ JOIN LIVE
+
       </button>
 
+
       <div
+
         class="error"
+
         id="errorMessage"
+
       ></div>
+
 
     </div>
 
 
-    <!-- STATUS -->
+    <!-- =========================================
+         STATUS
+    ========================================== -->
 
     <div
+
       class="status-box hidden"
+
       id="statusBox"
+
     >
 
+
       <div
+
         class="status-icon"
+
         id="statusIcon"
+
       >
+
         ⏳
+
       </div>
 
+
       <div
+
         class="status-title"
+
         id="statusTitle"
+
       >
+
         You're in the queue
+
       </div>
 
+
       <div
+
         class="status-text"
+
         id="statusText"
+
       >
-        You are connected. Please wait for the host to allow you to speak.
+
+        You are connected.
+        Please wait for the host
+        to allow you to speak.
+
       </div>
+
 
     </div>
 
 
     <div class="footer">
-      Kulzzy Radio Network • Celebrating Lives Everyday
+
+      Kulzzy Radio Network
+      •
+      Celebrating Lives Everyday
+
     </div>
 
+
   </main>
+
 
 </div>
 
 
+
 <script type="module">
+
 
   // =====================================================
   // KULZZY RADIO NETWORK
   // LIVE COMMUNITY
+  // VERSION 4.0
+  //
+  // IMPORTANT:
+  //
+  // EACH PHONE NUMBER GETS ITS OWN FIREBASE CALLER ID.
+  //
+  // Example:
+  //
+  // +2349017759411
+  // caller_2349017759411
+  //
+  // +2348062363050
+  // caller_2348062363050
+  //
+  // They are TWO different records.
+  //
+  // Entering a new number WILL NOT replace
+  // the previous number.
+  //
   // =====================================================
 
+
   import {
+
     auth,
+
     db
+
   } from "./js/firebase.js";
 
-  import {
-    signInAnonymously,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
   import {
+
+    signInAnonymously,
+
+    onAuthStateChanged
+
+  } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+
+  import {
+
     ref,
-    set,
+
     update,
+
     onValue,
+
     onDisconnect
+
   } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
 
 
   // =====================================================
   // ELEMENTS
   // =====================================================
 
+
   const phoneInput =
-    document.getElementById("phoneNumber");
+    document.getElementById(
+      "phoneNumber"
+    );
+
 
   const joinButton =
-    document.getElementById("joinButton");
+    document.getElementById(
+      "joinButton"
+    );
+
 
   const joinArea =
-    document.getElementById("joinArea");
+    document.getElementById(
+      "joinArea"
+    );
+
 
   const statusBox =
-    document.getElementById("statusBox");
+    document.getElementById(
+      "statusBox"
+    );
+
 
   const statusIcon =
-    document.getElementById("statusIcon");
+    document.getElementById(
+      "statusIcon"
+    );
+
 
   const statusTitle =
-    document.getElementById("statusTitle");
+    document.getElementById(
+      "statusTitle"
+    );
+
 
   const statusText =
-    document.getElementById("statusText");
+    document.getElementById(
+      "statusText"
+    );
+
 
   const errorMessage =
-    document.getElementById("errorMessage");
+    document.getElementById(
+      "errorMessage"
+    );
+
 
 
   // =====================================================
   // VARIABLES
   // =====================================================
 
-  let currentUser = null;
 
-  let callerUid = null;
+  let currentUser =
+    null;
 
-  let callerRef = null;
 
-  let callerListenerStarted = false;
+  let callerUid =
+    null;
+
+
+  let callerRef =
+    null;
+
+
+  let callerListenerStarted =
+    false;
+
+
+  let callerUnsubscribe =
+    null;
+
+
+  let currentPhone =
+    null;
+
 
 
   // =====================================================
   // PHONE NORMALIZATION
   // =====================================================
 
+
   function normalizePhone(phone) {
 
+
     let value =
+
       String(phone || "")
+
         .trim()
-        .replace(/[^\d+]/g, "");
+
+        .replace(
+          /[^\d+]/g,
+          ""
+        );
 
 
-    // Convert Nigerian 080... format to +23480...
+    // ===================================================
+    // NIGERIAN LOCAL FORMAT
+    //
+    // 08012345678
+    //
+    // becomes
+    //
+    // +2348012345678
+    // ===================================================
+
+
     if (
+
       value.startsWith("0") &&
+
       value.length >= 10
+
     ) {
 
       value =
+
         "+234" +
+
         value.substring(1);
 
     }
 
 
-    // Convert 234... to +234...
+    // ===================================================
+    // NIGERIAN INTERNATIONAL FORMAT WITHOUT +
+    //
+    // 2348012345678
+    //
+    // becomes
+    //
+    // +2348012345678
+    // ===================================================
+
+
     if (
+
       value.startsWith("234") &&
+
       !value.startsWith("+234")
+
     ) {
 
       value =
+
         "+" +
+
         value;
 
     }
@@ -386,97 +736,104 @@
   }
 
 
+
   // =====================================================
-  // CREATE A SAFE LOCAL CALLER ID
+  // CREATE PERMANENT CALLER ID
+  //
+  // PHONE:
+  //
+  // +2349017759411
+  //
+  // BECOMES:
+  //
+  // caller_2349017759411
+  //
   // =====================================================
 
-  function getStoredCallerId() {
 
-    const key =
-      "kulzzy_live_caller_uid";
+  function createCallerId(phone) {
 
 
-    let stored =
-      localStorage.getItem(key);
+    const normalized =
+      normalizePhone(phone);
 
 
-    if (stored) {
-
-      return stored;
-
-    }
-
-
-    if (
-      window.crypto &&
-      crypto.randomUUID
-    ) {
-
-      stored =
-        crypto.randomUUID();
-
-    } else {
-
-      stored =
-        "caller_" +
-        Date.now() +
-        "_" +
-        Math.random()
-          .toString(36)
-          .substring(2);
-
-    }
+    const digits =
+      normalized.replace(
+        /\D/g,
+        ""
+      );
 
 
-    localStorage.setItem(
-      key,
-      stored
+    return (
+      "caller_" +
+      digits
     );
-
-
-    return stored;
 
   }
 
 
+
   // =====================================================
-  // ERROR
+  // ERROR MESSAGE
   // =====================================================
+
 
   function showError(message) {
 
-    errorMessage.textContent =
-      message;
+
+    if (errorMessage) {
+
+      errorMessage.textContent =
+        message;
+
+    }
 
   }
+
 
 
   function clearError() {
 
-    errorMessage.textContent =
-      "";
+
+    if (errorMessage) {
+
+      errorMessage.textContent =
+        "";
+
+    }
 
   }
+
 
 
   // =====================================================
   // SHOW STATUS
   // =====================================================
 
+
   function showStatus(
+
     icon,
+
     title,
+
     text
+
   ) {
+
 
     statusIcon.textContent =
       icon;
 
+
     statusTitle.textContent =
       title;
 
+
     statusText.textContent =
       text;
+
 
     statusBox.classList.remove(
       "hidden"
@@ -485,98 +842,194 @@
   }
 
 
+
   // =====================================================
   // UPDATE STATUS FROM FIREBASE
   // =====================================================
 
-  function updateCallerStatus(caller) {
+
+  function updateCallerStatus(
+    caller
+  ) {
+
 
     if (!caller) {
+
       return;
+
     }
 
 
-    // ================================================
+    // ===================================================
     // DISCONNECTED
-    // ================================================
+    // ===================================================
+
 
     if (
+
       caller.status ===
       "disconnected"
+
     ) {
 
+
       showStatus(
+
         "❌",
+
         "Disconnected",
+
         "The host has disconnected you. You can join again when invited."
+
       );
+
 
       return;
 
     }
 
 
-    // ================================================
+
+    // ===================================================
     // ALLOWED TO SPEAK
-    // ================================================
+    // ===================================================
+
 
     if (
+
       caller.allowedToSpeak === true &&
+
       caller.muted === false
+
     ) {
 
+
       showStatus(
+
         "🎙️",
+
         "You are allowed to speak",
+
         "The host has allowed your microphone. Follow the microphone instructions to speak on-air."
+
       );
+
 
       return;
 
     }
 
 
-    // ================================================
+
+    // ===================================================
     // MUTED
-    // ================================================
+    // ===================================================
+
 
     if (
+
       caller.muted === true
+
     ) {
 
+
       showStatus(
+
         "🔇",
+
         "You're in the queue",
+
         "You are connected. Please wait for the host to allow you to speak."
+
       );
+
 
       return;
 
     }
 
 
-    // ================================================
+
+    // ===================================================
     // DEFAULT
-    // ================================================
+    // ===================================================
+
 
     showStatus(
+
       "⏳",
+
       "You're in the queue",
+
       "You are connected. Please wait for the host to allow you to speak."
+
     );
 
   }
 
 
+
   // =====================================================
-  // WATCH CALLER
+  // STOP CALLER LISTENER
   // =====================================================
+
+
+  function stopCallerListener() {
+
+
+    if (
+
+      callerUnsubscribe
+
+    ) {
+
+
+      try {
+
+        callerUnsubscribe();
+
+      }
+
+      catch (error) {
+
+        console.error(
+
+          "Unable to stop caller listener:",
+
+          error
+
+        );
+
+      }
+
+    }
+
+
+    callerUnsubscribe =
+      null;
+
+
+    callerListenerStarted =
+      false;
+
+  }
+
+
+
+  // =====================================================
+  // WATCH CURRENT CALLER
+  // =====================================================
+
 
   function startCallerListener() {
 
+
     if (
+
       callerListenerStarted ||
+
       !callerRef
+
     ) {
 
       return;
@@ -588,121 +1041,330 @@
       true;
 
 
-    onValue(
-      callerRef,
-      (snapshot) => {
+    callerUnsubscribe =
 
-        const caller =
-          snapshot.val();
+      onValue(
+
+        callerRef,
+
+        function(snapshot) {
 
 
-        if (caller) {
+          const caller =
+            snapshot.val();
 
-          updateCallerStatus(
-            caller
+
+          if (caller) {
+
+            updateCallerStatus(
+              caller
+            );
+
+          }
+
+        },
+
+        function(error) {
+
+
+          console.error(
+
+            "Caller listener error:",
+
+            error
+
           );
+
+
+          callerListenerStarted =
+            false;
 
         }
 
-      }
-    );
+      );
 
   }
 
 
+
   // =====================================================
-  // REGISTER / REJOIN CALLER
+  // MARK CURRENT CALLER OFFLINE
+  //
+  // IMPORTANT:
+  //
+  // THIS DOES NOT DELETE THE NUMBER.
+  //
   // =====================================================
 
-  async function registerCaller() {
 
-    if (!currentUser) {
+  async function markCurrentCallerOffline() {
 
-      showError(
-        "Connecting to the live system. Please wait a moment and try again."
-      );
+
+    if (!callerRef) {
 
       return;
 
     }
 
 
+    try {
+
+
+      await update(
+
+        callerRef,
+
+        {
+
+          online:
+            false,
+
+          status:
+            "offline",
+
+          muted:
+            true,
+
+          allowedToSpeak:
+            false,
+
+          lastSeen:
+            Date.now()
+
+        }
+
+      );
+
+
+    }
+
+    catch (error) {
+
+
+      console.error(
+
+        "Unable to mark previous caller offline:",
+
+        error
+
+      );
+
+    }
+
+  }
+
+
+
+  // =====================================================
+  // REGISTER CALLER
+  // =====================================================
+
+
+  async function registerCaller() {
+
+
+    if (!currentUser) {
+
+
+      showError(
+
+        "Connecting to the live system. Please wait a moment and try again."
+
+      );
+
+
+      return;
+
+    }
+
+
+
+    // ===================================================
+    // GET PHONE
+    // ===================================================
+
+
     const phone =
+
       normalizePhone(
+
         phoneInput.value
+
       );
 
 
     if (!phone) {
 
+
       showError(
+
         "Please enter your phone number."
+
       );
+
 
       return;
 
     }
+
+
+
+    // ===================================================
+    // VALIDATE PHONE
+    // ===================================================
 
 
     if (
+
       phone.length < 10
+
     ) {
 
+
       showError(
+
         "Please enter a valid phone number."
+
       );
+
 
       return;
 
     }
+
 
 
     clearError();
 
 
+
+    // ===================================================
+    // CREATE PHONE-BASED CALLER ID
+    //
+    // THIS IS THE MAIN FIX.
+    // ===================================================
+
+
+    const newCallerUid =
+
+      createCallerId(
+        phone
+      );
+
+
+
+    // ===================================================
+    // IF THIS DEVICE WAS USING ANOTHER NUMBER,
+    // MARK THE OLD NUMBER OFFLINE.
+    //
+    // DO NOT DELETE IT.
+    // ===================================================
+
+
+    if (
+
+      callerRef &&
+
+      callerUid &&
+
+      callerUid !== newCallerUid
+
+    ) {
+
+
+      await markCurrentCallerOffline();
+
+
+      stopCallerListener();
+
+    }
+
+
+
+    // ===================================================
+    // SET CURRENT CALLER
+    // ===================================================
+
+
+    callerUid =
+      newCallerUid;
+
+
+    currentPhone =
+      phone;
+
+
+
+    callerRef =
+
+      ref(
+
+        db,
+
+        "callers/" +
+
+        callerUid
+
+      );
+
+
+
+    // ===================================================
+    // SAVE PHONE LOCALLY
+    // ===================================================
+
+
+    localStorage.setItem(
+
+      "kulzzy_live_phone",
+
+      phone
+
+    );
+
+
+    localStorage.setItem(
+
+      "kulzzy_live_caller_uid",
+
+      callerUid
+
+    );
+
+
+
+    // ===================================================
+    // BUTTON
+    // ===================================================
+
+
     joinButton.disabled =
       true;
+
 
     joinButton.textContent =
       "CONNECTING...";
 
 
+
     try {
 
-      /*
-       * IMPORTANT:
-       *
-       * We reuse the same Firebase
-       * Authentication UID every time
-       * this browser joins.
-       *
-       * Therefore:
-       *
-       * caller UID
-       * remains the same
-       *
-       * instead of creating another
-       * caller record.
-       */
 
-      callerUid =
-        currentUser.uid;
+      // =================================================
+      // UPDATE ONLY THIS CALLER RECORD
+      //
+      // IMPORTANT:
+      //
+      // We DO NOT use the Firebase Auth UID
+      // as the caller database key.
+      //
+      // =================================================
 
-
-      callerRef =
-        ref(
-          db,
-          "callers/" +
-          callerUid
-        );
-
-
-      // ===============================================
-      // SAVE / REJOIN EXISTING CALLER
-      // ===============================================
 
       await update(
+
         callerRef,
+
         {
 
           phone:
@@ -727,17 +1389,23 @@
             Date.now()
 
         }
+
       );
 
 
-      /*
-       * If the browser disconnects,
-       * Firebase automatically marks
-       * this caller offline.
-       */
+
+      // =================================================
+      // ON CONNECTION LOSS
+      //
+      // KEEP THE RECORD.
+      // ONLY CHANGE ITS STATUS.
+      // =================================================
+
 
       await onDisconnect(
+
         callerRef
+
       ).update({
 
         online:
@@ -758,8 +1426,20 @@
       });
 
 
+
+      // =================================================
+      // SHOW NORMALIZED PHONE
+      // =================================================
+
+
       phoneInput.value =
         phone;
+
+
+
+      // =================================================
+      // HIDE JOIN FORM
+      // =================================================
 
 
       joinArea.classList.add(
@@ -767,38 +1447,95 @@
       );
 
 
+
+      // =================================================
+      // SHOW WAITING STATUS
+      // =================================================
+
+
       showStatus(
+
         "⏳",
+
         "You're in the queue",
+
         "You are connected. Please wait for the host to allow you to speak."
+
       );
+
+
+
+      // =================================================
+      // LISTEN ONLY TO THIS CALLER
+      // =================================================
 
 
       startCallerListener();
 
 
+
+      // =================================================
+      // DEBUG
+      // =================================================
+
+
       console.log(
-        "Kulzzy caller registered:",
-        callerUid,
+        "===================================="
+      );
+
+
+      console.log(
+        "🎙️ KULZZY CALLER REGISTERED"
+      );
+
+
+      console.log(
+        "Phone:",
         phone
       );
 
 
-    } catch (error) {
+      console.log(
+        "Caller ID:",
+        callerUid
+      );
+
+
+      console.log(
+        "Firebase path:",
+        "callers/" + callerUid
+      );
+
+
+      console.log(
+        "===================================="
+      );
+
+
+    }
+
+    catch (error) {
+
 
       console.error(
+
         "Caller registration error:",
+
         error
+
       );
 
 
       showError(
+
         "Unable to connect to the live system. Please try again."
+
       );
 
 
       joinButton.disabled =
         false;
+
 
       joinButton.textContent =
         "🎙️ JOIN LIVE";
@@ -808,150 +1545,272 @@
   }
 
 
+
   // =====================================================
   // JOIN BUTTON
   // =====================================================
 
+
   joinButton.addEventListener(
+
     "click",
+
     registerCaller
+
   );
 
 
+
+  // =====================================================
+  // ENTER KEY
+  // =====================================================
+
+
   phoneInput.addEventListener(
+
     "keydown",
-    (event) => {
+
+    function(event) {
+
 
       if (
+
         event.key ===
         "Enter"
+
       ) {
+
+
+        event.preventDefault();
+
 
         registerCaller();
 
       }
 
     }
+
   );
 
 
+
   // =====================================================
-  // AUTHENTICATION
+  // FIREBASE AUTHENTICATION
   // =====================================================
+
 
   onAuthStateChanged(
+
     auth,
-    async (user) => {
+
+    async function(user) {
+
+
+      // =================================================
+      // ALREADY AUTHENTICATED
+      // =================================================
+
 
       if (user) {
+
 
         currentUser =
           user;
 
 
         console.log(
-          "Caller Firebase authentication ready:",
+
+          "Firebase anonymous authentication ready:",
+
           user.uid
+
         );
 
 
-        /*
-         * If this browser already has
-         * a caller session, reconnect
-         * automatically.
-         */
+
+        // ===============================================
+        // LOAD PREVIOUS PHONE
+        // ===============================================
+
 
         const savedPhone =
-          localStorage.getItem(
-            "kulzzy_live_phone"
-          );
-
-
-        if (
-          savedPhone &&
-          !callerUid
-        ) {
-
-          phoneInput.value =
-            savedPhone;
-
-        }
-
-
-        joinButton.disabled =
-          false;
-
-        joinButton.textContent =
-          "🎙️ JOIN LIVE";
-
-
-      } else {
-
-        try {
-
-          await signInAnonymously(
-            auth
-          );
-
-        } catch (error) {
-
-          console.error(
-            "Anonymous Firebase login error:",
-            error
-          );
-
-
-          showError(
-            "Unable to connect to the live system."
-          );
-
-        }
-
-      }
-
-    }
+  localStorage.getItem(
+    "kulzzy_live_phone"
   );
 
 
-  // =====================================================
-  // SAVE PHONE LOCALLY
-  // =====================================================
+if (
+  savedPhone &&
+  !currentPhone
+) {
 
-  phoneInput.addEventListener(
-    "change",
-    () => {
+  phoneInput.value =
+    savedPhone;
 
-      const phone =
-        normalizePhone(
-          phoneInput.value
-        );
+}
 
 
-      if (phone) {
+// ============================================
+// CHECK IF THERE IS A SAVED CALLER ID
+// ============================================
 
-        localStorage.setItem(
-          "kulzzy_live_phone",
-          phone
-        );
-
-      }
-
-    }
+const savedCallerUid =
+  localStorage.getItem(
+    "kulzzy_live_caller_uid"
   );
 
 
-  // =====================================================
-  // INITIALIZE
-  // =====================================================
+if (
+  savedCallerUid &&
+  !callerUid
+) {
 
-  getStoredCallerId();
+  console.log(
+    "Previous caller ID found:",
+    savedCallerUid
+  );
+
+}
+
+
+// ============================================
+// FIREBASE AUTHENTICATION READY
+// ============================================
+
+console.log(
+  "🎙️ Live Community is ready."
+);
+
+
+// ============================================
+// IF USER IS ALREADY AUTHENTICATED
+// ============================================
+
+if (
+  !callerListenerStarted &&
+  callerRef
+) {
+
+  startCallerListener();
+
+}
+
+
+return;
+
+}
+
+
+// ==============================================
+// NO USER YET
+// ==============================================
+
+console.log(
+  "No Firebase anonymous user found."
+);
+
+
+// ==============================================
+// SIGN IN ANONYMOUSLY
+// ==============================================
+
+try {
+
+  console.log(
+    "🔐 Starting Firebase anonymous authentication..."
+  );
+
+
+  await signInAnonymously(
+    auth
+  );
 
 
   console.log(
-    "🎙️ Kulzzy Radio Live Community loaded."
+    "✅ Firebase anonymous authentication started."
   );
+
+
+}
+
+catch (error) {
+
+  console.error(
+    "❌ Firebase anonymous authentication error:",
+    error
+  );
+
+
+  showError(
+    "Unable to connect to the live system. Please refresh the page and try again."
+  );
+
+}
+
+}
+
+);
+
+
+// =====================================================
+// PAGE CLEANUP
+// =====================================================
+
+window.addEventListener(
+  "beforeunload",
+  function () {
+
+    /*
+     * We intentionally DO NOT delete
+     * the caller record from Firebase.
+     *
+     * The number remains in the admin
+     * caller list.
+     */
+
+    console.log(
+      "🎙️ Leaving Kulzzy Radio Live Community."
+    );
+
+  }
+);
+
+
+// =====================================================
+// INITIAL PAGE MESSAGE
+// =====================================================
+
+console.log(
+  "=========================================="
+);
+
+console.log(
+  "🎙️ KULZZY RADIO NETWORK"
+);
+
+console.log(
+  "LIVE COMMUNITY"
+);
+
+console.log(
+  "Version 3.0"
+);
+
+console.log(
+  "Phone-based caller IDs enabled."
+);
+
+console.log(
+  "Caller records are NOT deleted."
+);
+
+console.log(
+  "=========================================="
+);
+
 
 </script>
 
 </body>
+
 </html>
