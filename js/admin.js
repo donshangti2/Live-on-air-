@@ -123,6 +123,16 @@ function startAdmin() {
   // VARIABLES
   // ====================================================
 
+  /*
+   * IMPORTANT
+   *
+   * We DO NOT clear this object every time
+   * Firebase sends a new snapshot.
+   *
+   * This allows previously seen callers to remain
+   * visible if another caller joins.
+   */
+
   let callers = {};
 
   let generalMute = true;
@@ -262,12 +272,6 @@ function startAdmin() {
           "Admin UID:",
           result.user.uid
         );
-
-
-        /*
-         * Authentication state below will
-         * open the admin panel.
-         */
 
 
       } catch (error) {
@@ -446,12 +450,6 @@ function startAdmin() {
         clearLoginMessage();
 
 
-        /*
-         * Give Firebase Authentication
-         * a short moment to establish the
-         * authenticated database session.
-         */
-
         await new Promise(
           function (resolve) {
 
@@ -575,14 +573,23 @@ function startAdmin() {
             snapshot.val() || {};
 
 
-          callers = {};
-
-
           /*
-           * IMPORTANT:
+           * ==================================================
+           * IMPORTANT FIX
+           * ==================================================
            *
-           * We keep offline callers.
-           * We do NOT delete them.
+           * DO NOT DO:
+           *
+           * callers = {};
+           *
+           * anymore.
+           *
+           * We merge Firebase records into the existing
+           * caller list.
+           *
+           * This prevents the admin panel from wiping
+           * previously displayed callers whenever Firebase
+           * sends another update.
            */
 
           Object.keys(data)
@@ -595,13 +602,28 @@ function startAdmin() {
 
                 if (caller) {
 
+                  /*
+                   * Update the existing caller.
+                   */
+
                   callers[uid] =
-                    caller;
+                    {
+                      ...(callers[uid] || {}),
+                      ...caller
+                    };
 
                 }
 
               }
             );
+
+
+          /*
+           * If Firebase currently contains no callers,
+           * we DO NOT clear the local list.
+           *
+           * Previously seen callers remain displayed.
+           */
 
 
           renderCallers();
@@ -658,12 +680,13 @@ function startAdmin() {
           }
 
 
-          if (callerCount) {
+          /*
+           * IMPORTANT:
+           *
+           * We do NOT clear callers here.
+           */
 
-            callerCount.textContent =
-              "0";
-
-          }
+          renderCallers();
 
 
           showControlMessage(
@@ -1522,9 +1545,11 @@ function startAdmin() {
     try {
 
       /*
-       * DO NOT DELETE THE CALLER.
+       * IMPORTANT:
        *
-       * Keep their number in Firebase.
+       * NEVER DELETE THE CALLER.
+       *
+       * The caller remains in Firebase.
        */
 
       await update(
@@ -1798,4 +1823,3 @@ else {
   startAdmin();
 
 }
-     
