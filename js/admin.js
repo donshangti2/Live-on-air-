@@ -86,7 +86,7 @@ let callersListenerStarted = false;
 
 
 // ======================================================
-// LOGIN MESSAGE
+// MESSAGE FUNCTIONS
 // ======================================================
 
 function showLoginMessage(message) {
@@ -106,10 +106,6 @@ function clearLoginMessage() {
 
 }
 
-
-// ======================================================
-// CONTROL MESSAGE
-// ======================================================
 
 function showControlMessage(message) {
 
@@ -176,7 +172,7 @@ loginButton.addEventListener(
     } catch (error) {
 
       console.error(
-        "ADMIN LOGIN ERROR:",
+        "Admin login error:",
         error
       );
 
@@ -207,7 +203,7 @@ loginButton.addEventListener(
       ) {
 
         message =
-          "Too many login attempts. Try again later.";
+          "Too many login attempts. Please try again later.";
 
       } else if (
         error.code ===
@@ -217,9 +213,7 @@ loginButton.addEventListener(
         message =
           "This admin account has been disabled.";
 
-      } else if (
-        error.message
-      ) {
+      } else if (error.message) {
 
         message =
           error.message;
@@ -227,9 +221,7 @@ loginButton.addEventListener(
       }
 
 
-      showLoginMessage(
-        message
-      );
+      showLoginMessage(message);
 
 
       loginButton.disabled =
@@ -263,7 +255,7 @@ adminPassword.addEventListener(
 
 
 // ======================================================
-// AUTH STATE
+// AUTHENTICATION STATE
 // ======================================================
 
 onAuthStateChanged(
@@ -273,8 +265,13 @@ onAuthStateChanged(
     if (user) {
 
       console.log(
-        "ADMIN LOGGED IN:",
+        "Admin logged in:",
         user.email
+      );
+
+      console.log(
+        "Admin UID:",
+        user.uid
       );
 
 
@@ -295,6 +292,11 @@ onAuthStateChanged(
       clearLoginMessage();
 
 
+      /*
+       * Start the Firebase caller listener
+       * only after authentication is confirmed.
+       */
+
       startCallerListener();
 
 
@@ -304,7 +306,7 @@ onAuthStateChanged(
     } else {
 
       console.log(
-        "NO ADMIN USER LOGGED IN"
+        "No admin user logged in."
       );
 
 
@@ -348,7 +350,7 @@ logoutButton.addEventListener(
         } catch (error) {
 
           console.error(
-            "WEBRTC CLOSE ERROR:",
+            "WebRTC close error:",
             error
           );
 
@@ -367,10 +369,17 @@ logoutButton.addEventListener(
       await signOut(auth);
 
 
+      callersListenerStarted =
+        false;
+
+      callers =
+        {};
+
+
     } catch (error) {
 
       console.error(
-        "LOGOUT ERROR:",
+        "Logout error:",
         error
       );
 
@@ -400,11 +409,6 @@ function startCallerListener() {
     true;
 
 
-  console.log(
-    "STARTING FIREBASE CALLER LISTENER..."
-  );
-
-
   const callersRef =
     ref(
       db,
@@ -418,22 +422,12 @@ function startCallerListener() {
 
     (snapshot) => {
 
-      console.log(
-        "FIREBASE CALLERS SNAPSHOT RECEIVED"
-      );
-
-
       const data =
         snapshot.val() || {};
 
 
-      console.log(
-        "CALLER DATA:",
-        data
-      );
-
-
-      callers = {};
+      callers =
+        {};
 
 
       Object.keys(data)
@@ -460,78 +454,34 @@ function startCallerListener() {
 
       renderCallers();
 
-
-      showControlMessage(
-        "🟢 Connected to Firebase. Caller list is live."
-      );
-
     },
 
     (error) => {
 
       console.error(
-        "================================"
-      );
-
-      console.error(
-        "FIREBASE CALLER ERROR"
-      );
-
-      console.error(
-        "CODE:",
-        error.code
-      );
-
-      console.error(
-        "MESSAGE:",
-        error.message
-      );
-
-      console.error(
-        "FULL ERROR:",
+        "Firebase caller listener error:",
         error
       );
 
-      console.error(
-        "================================"
-      );
+
+      callers =
+        {};
 
 
-      callers = {};
+      callersList.innerHTML =
+        `
+        <div class="empty-callers">
+          Unable to read callers from Firebase.
+        </div>
+        `;
 
 
       callerCount.textContent =
         "0";
 
 
-      callersList.innerHTML =
-        `
-        <div class="empty-callers">
-
-          ❌ <strong>Firebase Database Error</strong>
-
-          <br><br>
-
-          <strong>Code:</strong>
-          ${escapeHTML(
-            error.code ||
-            "unknown"
-          )}
-
-          <br>
-
-          <strong>Message:</strong>
-          ${escapeHTML(
-            error.message ||
-            "Unknown Firebase error"
-          )}
-
-        </div>
-        `;
-
-
       showControlMessage(
-        "❌ Firebase cannot read the callers database. See the error above."
+        "Unable to read callers from Firebase."
       );
 
     }
@@ -776,7 +726,8 @@ async function activateGeneralMute() {
       false;
 
 
-    const updates = {};
+    const updates =
+      {};
 
 
     Object.keys(callers)
@@ -802,7 +753,7 @@ async function activateGeneralMute() {
 
 
     if (
-      Object.keys(updates).length
+      Object.keys(updates).length > 0
     ) {
 
       await update(
@@ -824,7 +775,7 @@ async function activateGeneralMute() {
       } catch (error) {
 
         console.error(
-          "WEBRTC CLOSE ERROR:",
+          "WebRTC close error:",
           error
         );
 
@@ -851,17 +802,13 @@ async function activateGeneralMute() {
   } catch (error) {
 
     console.error(
-      "GENERAL MUTE ERROR:",
+      "General mute error:",
       error
     );
 
 
     showControlMessage(
-      "❌ Unable to activate General Mute: " +
-      (
-        error.message ||
-        "Unknown error"
-      )
+      "Unable to activate General Mute."
     );
 
   }
@@ -870,7 +817,7 @@ async function activateGeneralMute() {
 
 
 // ======================================================
-// GENERAL MUTE + ALLOW ONE
+// GENERAL MUTE + ALLOW ONE PERSON
 // ======================================================
 
 allowOneButton.addEventListener(
@@ -918,7 +865,8 @@ async function allowCaller(uid) {
 
   try {
 
-    const updates = {};
+    const updates =
+      {};
 
 
     if (allowOneMode) {
@@ -994,7 +942,7 @@ async function allowCaller(uid) {
       } catch (error) {
 
         console.error(
-          "PREVIOUS WEBRTC CLOSE ERROR:",
+          "Previous WebRTC close error:",
           error
         );
 
@@ -1003,7 +951,9 @@ async function allowCaller(uid) {
     }
 
 
-    await connectHost(uid);
+    await connectHost(
+      uid
+    );
 
 
     connectedCaller =
@@ -1014,24 +964,20 @@ async function allowCaller(uid) {
 
 
     showControlMessage(
-      "🎙️ Caller is allowed. They must press PLAY LIVE AUDIO to hear their voice."
+      "🎙️ Caller is allowed. Waiting for them to press PLAY LIVE AUDIO."
     );
 
 
   } catch (error) {
 
     console.error(
-      "ALLOW CALLER ERROR:",
+      "Allow caller error:",
       error
     );
 
 
     showControlMessage(
-      "❌ Unable to allow caller: " +
-      (
-        error.message ||
-        "Unknown error"
-      )
+      "Unable to connect this caller."
     );
 
   }
@@ -1066,6 +1012,10 @@ async function toggleMute(uid) {
 
   try {
 
+    // ==================================================
+    // UNMUTE
+    // ==================================================
+
     if (currentlyMuted) {
 
       if (
@@ -1090,11 +1040,14 @@ async function toggleMute(uid) {
         ),
         {
 
-          muted: false,
+          muted:
+            false,
 
-          allowedToSpeak: true,
+          allowedToSpeak:
+            true,
 
-          status: "speaking"
+          status:
+            "speaking"
 
         }
       );
@@ -1115,7 +1068,7 @@ async function toggleMute(uid) {
           } catch (error) {
 
             console.error(
-              "PREVIOUS WEBRTC CLOSE ERROR:",
+              "Previous WebRTC close error:",
               error
             );
 
@@ -1124,7 +1077,9 @@ async function toggleMute(uid) {
         }
 
 
-        await connectHost(uid);
+        await connectHost(
+          uid
+        );
 
 
         connectedCaller =
@@ -1143,6 +1098,10 @@ async function toggleMute(uid) {
 
     } else {
 
+      // ==================================================
+      // MUTE
+      // ==================================================
+
       await update(
         ref(
           db,
@@ -1150,11 +1109,14 @@ async function toggleMute(uid) {
         ),
         {
 
-          muted: true,
+          muted:
+            true,
 
-          allowedToSpeak: false,
+          allowedToSpeak:
+            false,
 
-          status: "muted"
+          status:
+            "muted"
 
         }
       );
@@ -1166,12 +1128,14 @@ async function toggleMute(uid) {
 
         try {
 
-          await closeWebRTC(uid);
+          await closeWebRTC(
+            uid
+          );
 
         } catch (error) {
 
           console.error(
-            "WEBRTC MUTE ERROR:",
+            "WebRTC mute error:",
             error
           );
 
@@ -1196,17 +1160,13 @@ async function toggleMute(uid) {
   } catch (error) {
 
     console.error(
-      "MUTE ERROR:",
+      "Mute/unmute error:",
       error
     );
 
 
     showControlMessage(
-      "❌ Unable to change microphone: " +
-      (
-        error.message ||
-        "Unknown error"
-      )
+      "Unable to change caller microphone."
     );
 
   }
@@ -1229,13 +1189,17 @@ async function disconnectCaller(uid) {
       ),
       {
 
-        online: false,
+        online:
+          false,
 
-        status: "disconnected",
+        status:
+          "disconnected",
 
-        muted: true,
+        muted:
+          true,
 
-        allowedToSpeak: false
+        allowedToSpeak:
+          false
 
       }
     );
@@ -1247,12 +1211,14 @@ async function disconnectCaller(uid) {
 
       try {
 
-        await closeWebRTC(uid);
+        await closeWebRTC(
+          uid
+        );
 
       } catch (error) {
 
         console.error(
-          "WEBRTC DISCONNECT ERROR:",
+          "WebRTC disconnect error:",
           error
         );
 
@@ -1276,17 +1242,13 @@ async function disconnectCaller(uid) {
   } catch (error) {
 
     console.error(
-      "DISCONNECT ERROR:",
+      "Disconnect error:",
       error
     );
 
 
     showControlMessage(
-      "❌ Unable to disconnect caller: " +
-      (
-        error.message ||
-        "Unknown error"
-      )
+      "Unable to disconnect caller."
     );
 
   }
@@ -1295,7 +1257,7 @@ async function disconnectCaller(uid) {
 
 
 // ======================================================
-// CONTROL UI
+// CONTROL BUTTON UI
 // ======================================================
 
 function updateControlUI() {
@@ -1383,5 +1345,5 @@ updateControlUI();
 
 
 console.log(
-  "🎙️ KULZZY RADIO LIVE COMMUNITY ADMIN LOADED"
+  "🎙️ Kulzzy Radio Live Community Admin loaded."
 );
