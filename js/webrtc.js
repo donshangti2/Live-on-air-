@@ -1,19 +1,7 @@
 // ======================================================
 // KULZZY RADIO LIVE COMMUNITY
-// WebRTC Voice Connection Engine
+// WEBRTC ENGINE
 // ======================================================
-//
-// This file handles the private audio connection between
-// the caller and the host.
-//
-// IMPORTANT:
-// The caller's microphone is NOT broadcast to the public
-// website by this file.
-//
-// Firebase Realtime Database is used for WebRTC signaling.
-//
-// ======================================================
-
 
 import { db } from "./firebase.js";
 
@@ -27,325 +15,166 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
 
-// ======================================================
-// WEBRTC CONFIGURATION
-// ======================================================
-
 const ICE_SERVERS = {
-
   iceServers: [
-
     {
       urls: "stun:stun.l.google.com:19302"
     },
-
     {
       urls: "stun:stun1.l.google.com:19302"
     }
-
   ]
-
 };
 
 
-// ======================================================
-// VARIABLES
-// ======================================================
-
 let peerConnection = null;
-
 let localStream = null;
-
 let currentCallerId = null;
 
-let currentHostId = null;
-
-let isHost = false;
-
-let isMuted = true;
-
 
 // ======================================================
-// CREATE PEER CONNECTION
+// CREATE CONNECTION
 // ======================================================
 
-function createPeerConnection() {
+function createConnection(callerId, role) {
 
-  const connection =
-    new RTCPeerConnection(
-      ICE_SERVERS
+  const pc =
+    new RTCPeerConnection(ICE_SERVERS);
+
+
+  pc.onconnectionstatechange = () => {
+
+    console.log(
+      "WebRTC:",
+      role,
+      pc.connectionState
+    );
+
+  };
+
+
+  // ====================================================
+  // CALLER ICE
+  // ====================================================
+
+  pc.onicecandidate = async (event) => {
+
+    if (!event.candidate) {
+      return;
+    }
+
+
+    const path =
+      role === "caller"
+        ? `webrtc/${callerId}/callerCandidates`
+        : `webrtc/${callerId}/hostCandidates`;
+
+
+    const candidateId =
+      Date.now() +
+      "-" +
+      Math.random()
+        .toString(36)
+        .substring(2, 8);
+
+
+    try {
+
+      await set(
+        ref(
+          db,
+          `${path}/${candidateId}`
+        ),
+        event.candidate.toJSON()
+      );
+
+    } catch (error) {
+
+      console.error(
+        "ICE candidate error:",
+        error
+      );
+
+    }
+
+  };
+
+
+  // ====================================================
+  // HOST RECEIVES CALLER AUDIO
+  // ====================================================
+
+  pc.ontrack = (event) => {
+
+    console.log(
+      "Caller audio received."
     );
 
 
-  // --------------------------------------------
-  // ICE CANDIDATE
-  // --------------------------------------------
-
-  connection.onicecandidate =
-    async (event) => {
-
-      if (!event.candidate) {
-        return;
-      }
-
-
-      if (!currentCallerId) {
-        return;
-      }
-
-
-      const candidateRef =
-        ref(
-          db,
-          `webrtc/${currentCallerId}/candidates`
-        );
-
-
-      const candidateId =
-        Date.now().toString() +
-        "-" +
-        Math.random()
-          .toString(36)
-          .substring(2, 8);
-
-
-      try {
-
-        await set(
-          ref(
-            db,
-            `webrtc/${currentCallerId}/candidates/${candidateId}`
-          ),
-          event.candidate.toJSON()
-        );
-
-      } catch (error) {
-
-        console.error(
-          "Unable to save ICE candidate:",
-          error
-        );
-
-      }
-
-    };
-
-
-  // --------------------------------------------
-  // CONNECTION STATE
-  // --------------------------------------------
-
-  connection.onconnectionstatechange =
-    () => {
-
-      console.log(
-        "WebRTC connection:",
-        connection.connectionState
+    let audio =
+      document.getElementById(
+        "webrtcRemoteAudio"
       );
 
 
-      if (
-        connection.connectionState ===
-        "failed"
-      ) {
+    if (!audio) {
 
-        console.error(
-          "WebRTC connection failed."
+      audio =
+        document.createElement(
+          "audio"
         );
 
-      }
+      audio.id =
+        "webrtcRemoteAudio";
 
+      audio.autoplay =
+        true;
 
-      if (
-        connection.connectionState ===
-        "disconnected"
-      ) {
+      audio.controls =
+        false;
 
-        console.log(
-          "WebRTC connection disconnected."
-        );
+      audio.style.display =
+        "none";
 
-      }
-
-    };
-
-
-  // --------------------------------------------
-  // REMOTE AUDIO
-  // --------------------------------------------
-
-  connection.ontrack =
-    (event) => {
-
-      console.log(
-        "Remote audio received."
+      document.body.appendChild(
+        audio
       );
-
-
-      let audio =
-        document.getElementById(
-          "webrtcRemoteAudio"
-        );
-
-
-      if (!audio) {
-
-        audio =
-          document.createElement(
-            "audio"
-          );
-
-        audio.id =
-          "webrtcRemoteAudio";
-
-        audio.autoplay =
-          true;
-
-        audio.controls =
-          false;
-
-        audio.style.display =
-          "none";
-
-        document.body.appendChild(
-          audio
-        );
-
-      }
-
-
-      if (
-        event.streams &&
-        event.streams[0]
-      ) {
-
-        audio.srcObject =
-          event.streams[0];
-
-      }
-
-    };
-
-
-  return connection;
-
-}
-
-
-// ======================================================
-// CALLER: GET MICROPHONE
-// ======================================================
-
-export async function getCallerMicrophone() {
-
-  try {
-
-    if (localStream) {
-
-      return localStream;
 
     }
 
 
-    localStream =
-      await navigator.mediaDevices
-        .getUserMedia({
+    if (
+      event.streams &&
+      event.streams[0]
+    ) {
 
-          audio: {
+      audio.srcObject =
+        event.streams[0];
 
-            echoCancellation: true,
+      audio.play()
+        .catch(
+          (error) => {
 
-            noiseSuppression: true,
+            console.log(
+              "Audio autoplay waiting for user interaction:",
+              error
+            );
 
-            autoGainControl: true
+          }
+        );
 
-          },
+    }
 
-          video: false
-
-        });
-
-
-    console.log(
-      "Caller microphone obtained."
-    );
-
-
-    // Start muted.
-
-    setMicrophoneMuted(
-      true
-    );
+  };
 
 
-    return localStream;
-
-  } catch (error) {
-
-    console.error(
-      "Microphone permission error:",
-      error
-    );
-
-
-    throw error;
-
-  }
+  return pc;
 
 }
 
 
 // ======================================================
-// MUTE MICROPHONE
-// ======================================================
-
-export function setMicrophoneMuted(
-  muted
-) {
-
-  isMuted =
-    muted;
-
-
-  if (!localStream) {
-    return;
-  }
-
-
-  localStream
-    .getAudioTracks()
-    .forEach(
-      (track) => {
-
-        track.enabled =
-          !muted;
-
-      }
-    );
-
-
-  console.log(
-    muted
-      ? "Microphone muted."
-      : "Microphone unmuted."
-  );
-
-}
-
-
-// ======================================================
-// GET MICROPHONE STATUS
-// ======================================================
-
-export function microphoneIsMuted() {
-
-  return isMuted;
-
-}
-
-
-// ======================================================
-// CALLER: CONNECT TO HOST
+// CALLER CONNECT
 // ======================================================
 
 export async function connectCaller(
@@ -355,41 +184,45 @@ export async function connectCaller(
   currentCallerId =
     callerId;
 
-  isHost =
-    false;
 
+  // Get microphone ONLY when caller has
+  // been allowed to speak.
 
-  // Get microphone
+  localStream =
+    await navigator.mediaDevices
+      .getUserMedia({
 
-  const stream =
-    await getCallerMicrophone();
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        },
+
+        video: false
+
+      });
 
 
   peerConnection =
-    createPeerConnection();
+    createConnection(
+      callerId,
+      "caller"
+    );
 
 
-  // --------------------------------------------
-  // ADD MICROPHONE TRACKS
-  // --------------------------------------------
-
-  stream
+  localStream
     .getTracks()
     .forEach(
       (track) => {
 
         peerConnection.addTrack(
           track,
-          stream
+          localStream
         );
 
       }
     );
 
-
-  // --------------------------------------------
-  // CREATE OFFER
-  // --------------------------------------------
 
   const offer =
     await peerConnection.createOffer();
@@ -400,37 +233,27 @@ export async function connectCaller(
   );
 
 
-  // --------------------------------------------
-  // SAVE OFFER
-  // --------------------------------------------
-
   await set(
     ref(
       db,
       `webrtc/${callerId}/offer`
     ),
     {
-
-      type:
-        offer.type,
-
-      sdp:
-        offer.sdp
-
+      type: offer.type,
+      sdp: offer.sdp
     }
   );
 
 
-  // --------------------------------------------
-  // LISTEN FOR ANSWER
-  // --------------------------------------------
+  // ====================================================
+  // WAIT FOR HOST ANSWER
+  // ====================================================
 
   onValue(
     ref(
       db,
       `webrtc/${callerId}/answer`
     ),
-
     async (snapshot) => {
 
       const answer =
@@ -443,18 +266,9 @@ export async function connectCaller(
 
 
       if (
-        !peerConnection
-      ) {
-
-        return;
-
-      }
-
-
-      if (
-        peerConnection
-          .signalingState !==
-        "stable"
+        peerConnection &&
+        peerConnection.signalingState ===
+        "have-local-offer"
       ) {
 
         try {
@@ -472,7 +286,7 @@ export async function connectCaller(
         } catch (error) {
 
           console.error(
-            "Unable to set host answer:",
+            "Answer error:",
             error
           );
 
@@ -481,20 +295,18 @@ export async function connectCaller(
       }
 
     }
-
   );
 
 
-  // --------------------------------------------
-  // LISTEN FOR HOST ICE
-  // --------------------------------------------
+  // ====================================================
+  // HOST ICE CANDIDATES
+  // ====================================================
 
   onChildAdded(
     ref(
       db,
       `webrtc/${callerId}/hostCandidates`
     ),
-
     async (snapshot) => {
 
       const candidate =
@@ -522,19 +334,13 @@ export async function connectCaller(
       } catch (error) {
 
         console.error(
-          "Unable to add host ICE candidate:",
+          "Host ICE error:",
           error
         );
 
       }
 
     }
-
-  );
-
-
-  console.log(
-    "Caller WebRTC offer created."
   );
 
 
@@ -544,292 +350,147 @@ export async function connectCaller(
 
 
 // ======================================================
-// HOST: LISTEN FOR CALLER
+// HOST CONNECT
 // ======================================================
 
-export function listenForCaller(
+export async function connectHost(
   callerId
 ) {
 
   currentCallerId =
     callerId;
 
-  currentHostId =
-    "host";
 
-  isHost =
-    true;
+  peerConnection =
+    createConnection(
+      callerId,
+      "host"
+    );
 
 
-  console.log(
-    "Listening for caller:",
-    callerId
+  // ====================================================
+  // WAIT FOR CALLER OFFER
+  // ====================================================
+
+  const offer =
+    await new Promise(
+      (resolve) => {
+
+        const offerRef =
+          ref(
+            db,
+            `webrtc/${callerId}/offer`
+          );
+
+
+        const unsubscribe =
+          onValue(
+            offerRef,
+            (snapshot) => {
+
+              const offer =
+                snapshot.val();
+
+
+              if (offer) {
+
+                unsubscribe();
+
+                resolve(
+                  offer
+                );
+
+              }
+
+            }
+          );
+
+      }
+    );
+
+
+  await peerConnection.setRemoteDescription(
+    new RTCSessionDescription(
+      offer
+    )
   );
 
 
-  onValue(
+  // ====================================================
+  // CREATE ANSWER
+  // ====================================================
+
+  const answer =
+    await peerConnection.createAnswer();
+
+
+  await peerConnection.setLocalDescription(
+    answer
+  );
+
+
+  await set(
     ref(
       db,
-      `webrtc/${callerId}/offer`
+      `webrtc/${callerId}/answer`
     ),
+    {
+      type: answer.type,
+      sdp: answer.sdp
+    }
+  );
 
+
+  // ====================================================
+  // CALLER ICE
+  // ====================================================
+
+  onChildAdded(
+    ref(
+      db,
+      `webrtc/${callerId}/callerCandidates`
+    ),
     async (snapshot) => {
 
-      const offer =
+      const candidate =
         snapshot.val();
 
 
-      if (!offer) {
+      if (
+        !candidate ||
+        !peerConnection
+      ) {
 
         return;
 
       }
 
 
-      await acceptCallerOffer(
-        callerId,
-        offer
-      );
+      try {
 
-    }
-
-  );
-
-}
-
-
-// ======================================================
-// HOST: ACCEPT CALLER OFFER
-// ======================================================
-
-export async function acceptCallerOffer(
-  callerId,
-  offer
-) {
-
-  currentCallerId =
-    callerId;
-
-  isHost =
-    true;
-
-
-  if (!peerConnection) {
-
-    peerConnection =
-      createPeerConnection();
-
-  }
-
-
-  try {
-
-    await peerConnection.setRemoteDescription(
-      new RTCSessionDescription(
-        offer
-      )
-    );
-
-
-    const answer =
-      await peerConnection.createAnswer();
-
-
-    await peerConnection.setLocalDescription(
-      answer
-    );
-
-
-    await set(
-      ref(
-        db,
-        `webrtc/${callerId}/answer`
-      ),
-      {
-
-        type:
-          answer.type,
-
-        sdp:
-          answer.sdp
-
-      }
-    );
-
-
-    console.log(
-      "Host answer sent."
-    );
-
-
-  } catch (error) {
-
-    console.error(
-      "Unable to accept caller:",
-      error
-    );
-
-  }
-
-}
-
-
-// ======================================================
-// HOST: MUTE CALLER
-// ======================================================
-//
-// This function changes the caller's Firebase
-// permission state AND can be used by the host
-// to control the received audio.
-//
-// ======================================================
-
-export async function muteCaller(
-  callerId
-) {
-
-  await update(
-    ref(
-      db,
-      `callers/${callerId}`
-    ),
-    {
-
-      muted:
-        true,
-
-      allowedToSpeak:
-        false,
-
-      status:
-        "muted"
-
-    }
-  );
-
-
-  console.log(
-    "Caller muted:",
-    callerId
-  );
-
-}
-
-
-// ======================================================
-// HOST: ALLOW CALLER
-// ======================================================
-
-export async function allowCaller(
-  callerId
-) {
-
-  await update(
-    ref(
-      db,
-      `callers/${callerId}`
-    ),
-    {
-
-      muted:
-        false,
-
-      allowedToSpeak:
-        true,
-
-      status:
-        "speaking"
-
-    }
-  );
-
-
-  console.log(
-    "Caller allowed to speak:",
-    callerId
-  );
-
-}
-
-
-// ======================================================
-// CLOSE CONNECTION
-// ======================================================
-
-export async function closeWebRTC(
-  callerId
-) {
-
-  try {
-
-    if (localStream) {
-
-      localStream
-        .getTracks()
-        .forEach(
-          (track) => {
-
-            track.stop();
-
-          }
+        await peerConnection.addIceCandidate(
+          new RTCIceCandidate(
+            candidate
+          )
         );
 
-      localStream =
-        null;
+      } catch (error) {
+
+        console.error(
+          "Caller ICE error:",
+          error
+        );
+
+      }
 
     }
+  );
 
 
-    if (peerConnection) {
+  console.log(
+    "Host connected to caller."
+  );
 
-      peerConnection.close();
-
-      peerConnection =
-        null;
-
-    }
-
-
-    if (callerId) {
-
-      await remove(
-        ref(
-          db,
-          `webrtc/${callerId}`
-        )
-      );
-
-    }
-
-
-    currentCallerId =
-      null;
-
-    currentHostId =
-      null;
-
-
-    console.log(
-      "WebRTC connection closed."
-    );
-
-  } catch (error) {
-
-    console.error(
-      "Error closing WebRTC:",
-      error
-    );
-
-  }
-
-}
-
-
-// ======================================================
-// EXPORT CURRENT CONNECTION
-// ======================================================
-
-export function getPeerConnection() {
 
   return peerConnection;
 
@@ -837,20 +498,77 @@ export function getPeerConnection() {
 
 
 // ======================================================
-// EXPORT CURRENT CALLER
+// CLOSE
 // ======================================================
 
-export function getCurrentCallerId() {
+export async function closeWebRTC(
+  callerId
+) {
 
-  return currentCallerId;
+  if (localStream) {
+
+    localStream
+      .getTracks()
+      .forEach(
+        (track) => track.stop()
+      );
+
+    localStream =
+      null;
+
+  }
+
+
+  if (peerConnection) {
+
+    peerConnection.close();
+
+    peerConnection =
+      null;
+
+  }
+
+
+  if (callerId) {
+
+    await remove(
+      ref(
+        db,
+        `webrtc/${callerId}`
+      )
+    );
+
+  }
+
+
+  currentCallerId =
+    null;
 
 }
 
 
 // ======================================================
-// INITIAL MESSAGE
+// MUTE LOCAL MICROPHONE
 // ======================================================
 
-console.log(
-  "Kulzzy Radio WebRTC engine loaded."
-);
+export function muteLocalMicrophone(
+  muted
+) {
+
+  if (!localStream) {
+    return;
+  }
+
+
+  localStream
+    .getAudioTracks()
+    .forEach(
+      (track) => {
+
+        track.enabled =
+          !muted;
+
+      }
+    );
+
+    }
