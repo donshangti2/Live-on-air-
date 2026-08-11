@@ -2,10 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Kulzzy Radio - Live Community</title>
 
@@ -22,27 +19,19 @@
       background: #06152f;
       color: #ffffff;
       font-family: Arial, Helvetica, sans-serif;
-
       display: flex;
       justify-content: center;
       align-items: center;
-
       padding: 20px;
     }
 
     .container {
       width: 100%;
       max-width: 430px;
-
       background: #0b2144;
-
       border-radius: 22px;
-
       padding: 30px 22px;
-
-      box-shadow:
-        0 15px 40px rgba(0, 0, 0, 0.35);
-
+      box-shadow: 0 15px 40px rgba(0,0,0,.35);
       text-align: center;
     }
 
@@ -50,32 +39,24 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-
       background: #d90000;
-
       padding: 8px 15px;
-
       border-radius: 30px;
-
       font-size: 13px;
       font-weight: bold;
-
       margin-bottom: 20px;
     }
 
     .live-dot {
       width: 9px;
       height: 9px;
-
       background: #ffffff;
-
       border-radius: 50%;
     }
 
     h1 {
       font-size: 29px;
       line-height: 1.15;
-
       margin-bottom: 10px;
     }
 
@@ -85,44 +66,31 @@
 
     .description {
       color: #c8d3e5;
-
       font-size: 14px;
       line-height: 1.6;
-
       margin-bottom: 25px;
     }
 
     .phone-box {
       text-align: left;
-
       margin-bottom: 15px;
     }
 
     .phone-box label {
       display: block;
-
       font-size: 13px;
       font-weight: bold;
-
       margin-bottom: 8px;
     }
 
     .phone-box input {
       width: 100%;
-
       padding: 15px;
-
-      border:
-        1px solid #38547d;
-
+      border: 1px solid #38547d;
       border-radius: 12px;
-
       background: #071936;
-
       color: #ffffff;
-
       font-size: 16px;
-
       outline: none;
     }
 
@@ -132,90 +100,59 @@
 
     .join-btn {
       width: 100%;
-
       border: none;
-
       border-radius: 12px;
-
       padding: 16px;
-
       background: #ffd21c;
-
       color: #06152f;
-
       font-size: 16px;
-
       font-weight: 800;
-
       cursor: pointer;
-
       margin-top: 5px;
     }
 
     .join-btn:disabled {
-      opacity: 0.6;
-
+      opacity: .6;
       cursor: not-allowed;
     }
 
     .status-box {
       display: none;
-
       margin-top: 20px;
-
       padding: 18px;
-
       border-radius: 14px;
-
       background: #071936;
-
-      border:
-        1px solid #38547d;
+      border: 1px solid #38547d;
     }
 
     .status-icon {
       font-size: 35px;
-
       margin-bottom: 8px;
     }
 
     .status-title {
       font-size: 17px;
-
       font-weight: bold;
-
       margin-bottom: 6px;
     }
 
     .status-text {
       color: #c8d3e5;
-
       font-size: 13px;
-
       line-height: 1.5;
     }
 
     .live-button {
       display: none;
-
       width: 100%;
-
       margin-top: 15px;
-
       padding: 16px;
-
       border: none;
-
       border-radius: 12px;
-
       background: #d90000;
-
       color: #ffffff;
-
       font-size: 16px;
-
       font-weight: 800;
-
       cursor: pointer;
     }
 
@@ -223,22 +160,23 @@
       background: #168b45;
     }
 
-    .footer {
-      margin-top: 22px;
-
-      color: #8395b2;
-
-      font-size: 11px;
+    .live-button:disabled {
+      opacity: .7;
+      cursor: not-allowed;
     }
 
     .error {
       display: none;
-
       margin-top: 12px;
-
       color: #ff8e8e;
-
       font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      margin-top: 22px;
+      color: #8395b2;
+      font-size: 11px;
     }
 
   </style>
@@ -249,18 +187,11 @@
 
   <main class="container">
 
-    <!-- LIVE BADGE -->
-
     <div class="live-badge">
-
       <span class="live-dot"></span>
-
       LIVE COMMUNITY
-
     </div>
 
-
-    <!-- TITLE -->
 
     <h1>
       Join <span class="gold">Kulzzy Radio</span>
@@ -268,17 +199,10 @@
 
 
     <p class="description">
-
-      Join us live and get the opportunity to
-      speak on-air.
-
-      Enter your phone number below to join
-      the waiting queue.
-
+      Join us live and get the opportunity to speak on-air.
+      Enter your phone number below to join the waiting queue.
     </p>
 
-
-    <!-- PHONE -->
 
     <div class="phone-box">
 
@@ -297,8 +221,6 @@
     </div>
 
 
-    <!-- JOIN -->
-
     <button
       class="join-btn"
       id="joinBtn"
@@ -307,15 +229,11 @@
     </button>
 
 
-    <!-- ERROR -->
-
     <div
       class="error"
       id="errorMessage"
     ></div>
 
-
-    <!-- STATUS -->
 
     <div
       class="status-box"
@@ -343,14 +261,11 @@
         id="statusText"
       >
         You are connected.
-        Please wait for the host to allow
-        you to speak.
+        Please wait for the host to allow you to speak.
       </div>
 
     </div>
 
-
-    <!-- LIVE AUDIO -->
 
     <button
       class="live-button"
@@ -360,21 +275,16 @@
     </button>
 
 
-    <!-- FOOTER -->
-
     <div class="footer">
-
-      Kulzzy Radio Network
-      • Celebrating Lives Everyday
-
+      Kulzzy Radio Network • Celebrating Lives Everyday
     </div>
 
   </main>
 
 
-  <!-- ====================================== -->
-  <!-- FIREBASE -->
-  <!-- ====================================== -->
+  <!-- ================================================= -->
+  <!-- FIREBASE + WEBRTC -->
+  <!-- ================================================= -->
 
   <script type="module">
 
@@ -400,45 +310,48 @@
     } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
 
-    // ======================================
+    /*
+     * WEBRTC ENGINE
+     */
+
+    import {
+      connectCaller,
+      closeWebRTC
+    } from "./js/webrtc.js";
+
+
+    // =================================================
     // ELEMENTS
-    // ======================================
+    // =================================================
 
     const phoneInput =
       document.getElementById("phone");
 
-
     const joinBtn =
       document.getElementById("joinBtn");
-
 
     const statusBox =
       document.getElementById("statusBox");
 
-
     const statusIcon =
       document.getElementById("statusIcon");
-
 
     const statusTitle =
       document.getElementById("statusTitle");
 
-
     const statusText =
       document.getElementById("statusText");
 
-
     const liveButton =
       document.getElementById("liveButton");
-
 
     const errorMessage =
       document.getElementById("errorMessage");
 
 
-    // ======================================
+    // =================================================
     // VARIABLES
-    // ======================================
+    // =================================================
 
     let currentUser = null;
 
@@ -446,12 +359,12 @@
 
     let callerJoined = false;
 
-    let connectionListenerStarted = false;
+    let webrtcConnected = false;
 
 
-    // ======================================
+    // =================================================
     // ERROR
-    // ======================================
+    // =================================================
 
     function showError(message) {
 
@@ -475,9 +388,9 @@
     }
 
 
-    // ======================================
+    // =================================================
     // STATUS
-    // ======================================
+    // =================================================
 
     function showStatus(
       icon,
@@ -488,14 +401,11 @@
       statusBox.style.display =
         "block";
 
-
       statusIcon.textContent =
         icon;
 
-
       statusTitle.textContent =
         title;
-
 
       statusText.textContent =
         text;
@@ -503,29 +413,31 @@
     }
 
 
-    // ======================================
-    // ANONYMOUS LOGIN
-    // ======================================
+    // =================================================
+    // FIREBASE ANONYMOUS LOGIN
+    // =================================================
 
-    signInAnonymously(auth)
-      .catch((error) => {
+    try {
 
-        console.error(
-          "Anonymous login error:",
-          error
-        );
+      await signInAnonymously(auth);
+
+    } catch (error) {
+
+      console.error(
+        "Anonymous login error:",
+        error
+      );
+
+      showError(
+        "Unable to connect to the live system. Please try again."
+      );
+
+    }
 
 
-        showError(
-          "Unable to connect to the live system. Please try again."
-        );
-
-      });
-
-
-    // ======================================
+    // =================================================
     // AUTH STATE
-    // ======================================
+    // =================================================
 
     onAuthStateChanged(
       auth,
@@ -533,18 +445,18 @@
 
         if (!user) {
 
-          currentUser = null;
+          currentUser =
+            null;
 
           return;
 
         }
 
-
-        currentUser = user;
-
+        currentUser =
+          user;
 
         console.log(
-          "Connected user:",
+          "Caller Firebase UID:",
           user.uid
         );
 
@@ -552,9 +464,9 @@
     );
 
 
-    // ======================================
+    // =================================================
     // JOIN LIVE
-    // ======================================
+    // =================================================
 
     joinBtn.addEventListener(
       "click",
@@ -566,10 +478,6 @@
         const phone =
           phoneInput.value.trim();
 
-
-        // ----------------------------------
-        // PHONE VALIDATION
-        // ----------------------------------
 
         if (!phone) {
 
@@ -593,10 +501,6 @@
         }
 
 
-        // ----------------------------------
-        // AUTH CHECK
-        // ----------------------------------
-
         if (!currentUser) {
 
           showError(
@@ -607,10 +511,6 @@
 
         }
 
-
-        // ----------------------------------
-        // BUTTON
-        // ----------------------------------
 
         joinBtn.disabled =
           true;
@@ -629,26 +529,31 @@
             );
 
 
-          // =================================
-          // CREATE CALLER
-          // =================================
+          // =========================================
+          // CREATE CALLER RECORD
+          // =========================================
 
           await set(
             callerRef,
             {
 
-              phone: phone,
+              phone:
+                phone,
 
-              status: "waiting",
+              status:
+                "waiting",
 
-              muted: true,
+              muted:
+                true,
 
-              allowedToSpeak: false,
+              allowedToSpeak:
+                false,
 
               joinedAt:
                 serverTimestamp(),
 
-              online: true
+              online:
+                true
 
             }
           );
@@ -658,12 +563,9 @@
             true;
 
 
-          // =================================
-          // IMPORTANT:
-          // ONLY MARK OFFLINE WHEN THE
-          // FIREBASE CONNECTION ACTUALLY
-          // CLOSES.
-          // =================================
+          // =========================================
+          // FIREBASE CONNECTION STATUS
+          // =========================================
 
           const connectedRef =
             ref(
@@ -686,17 +588,14 @@
                 callerJoined
               ) {
 
-                // --------------------------------
-                // Firebase has confirmed connection
-                // --------------------------------
-
                 try {
 
                   await update(
                     callerRef,
                     {
 
-                      online: true,
+                      online:
+                        true,
 
                       status:
                         "waiting"
@@ -705,29 +604,28 @@
                   );
 
 
-                  // --------------------------------
-                  // Set disconnect handler
-                  // --------------------------------
-
                   await onDisconnect(
                     callerRef
                   ).update({
 
-                    online: false,
+                    online:
+                      false,
 
                     status:
                       "offline",
 
-                    muted: true,
+                    muted:
+                      true,
 
-                    allowedToSpeak: false
+                    allowedToSpeak:
+                      false
 
                   });
 
                 } catch (error) {
 
                   console.error(
-                    "Connection setup error:",
+                    "Disconnect setup error:",
                     error
                   );
 
@@ -739,17 +637,12 @@
           );
 
 
-          connectionListenerStarted =
-            true;
-
-
-          // =================================
-          // UPDATE PAGE
-          // =================================
+          // =========================================
+          // UPDATE PUBLIC PAGE
+          // =========================================
 
           phoneInput.disabled =
             true;
-
 
           joinBtn.style.display =
             "none";
@@ -762,13 +655,13 @@
           );
 
 
-          // =================================
+          // =========================================
           // LISTEN FOR ADMIN CONTROL
-          // =================================
+          // =========================================
 
           onValue(
             callerRef,
-            (snapshot) => {
+            async (snapshot) => {
 
               const data =
                 snapshot.val();
@@ -781,9 +674,15 @@
               }
 
 
-              // --------------------------------
+              console.log(
+                "Caller status:",
+                data
+              );
+
+
+              // =======================================
               // DISCONNECTED
-              // --------------------------------
+              // =======================================
 
               if (
                 data.status ===
@@ -801,24 +700,49 @@
                   "none";
 
 
+                if (webrtcConnected) {
+
+                  try {
+
+                    await closeWebRTC(
+                      currentUser.uid
+                    );
+
+                  } catch (error) {
+
+                    console.error(
+                      "WebRTC close error:",
+                      error
+                    );
+
+                  }
+
+                  webrtcConnected =
+                    false;
+
+                }
+
+
                 return;
 
               }
 
 
-              // --------------------------------
-              // ALLOWED TO SPEAK
-              // --------------------------------
+              // =======================================
+              // HOST ALLOWED CALLER
+              // =======================================
 
               if (
-                data.allowedToSpeak === true &&
-                data.muted === false
+                data.allowedToSpeak ===
+                  true &&
+                data.muted ===
+                  false
               ) {
 
                 showStatus(
                   "🎙️",
-                  "You are LIVE",
-                  "The host has allowed you to speak."
+                  "YOU ARE LIVE",
+                  "The host has allowed you to speak. Tap PLAY LIVE AUDIO to activate your microphone."
                 );
 
 
@@ -836,9 +760,9 @@
               }
 
 
-              // --------------------------------
-              // MUTED
-              // --------------------------------
+              // =======================================
+              // MUTED / WAITING
+              // =======================================
 
               showStatus(
                 "⏳",
@@ -870,7 +794,6 @@
           joinBtn.disabled =
             false;
 
-
           joinBtn.textContent =
             "🎙️ JOIN LIVE";
 
@@ -880,74 +803,114 @@
     );
 
 
-    // ======================================
-    // LIVE AUDIO BUTTON
-    // ======================================
+    // =================================================
+    // PLAY LIVE AUDIO / ACTIVATE MICROPHONE
+    // =================================================
 
     liveButton.addEventListener(
       "click",
       async () => {
 
+        hideError();
+
+
         if (!currentUser) {
+
+          showError(
+            "Your connection is not ready."
+          );
 
           return;
 
         }
 
 
+        if (webrtcConnected) {
+
+          return;
+
+        }
+
+
+        liveButton.disabled =
+          true;
+
+        liveButton.textContent =
+          "CONNECTING...";
+
+
         try {
 
           /*
-           * For this stage we only request
-           * microphone permission.
-           *
-           * The actual WebRTC audio connection
-           * will be added in webrtc.js.
+           * This requests microphone permission
+           * and creates the WebRTC offer.
            */
 
-          const stream =
-            await navigator.mediaDevices
-              .getUserMedia({
-                audio: true
-              });
+          await connectCaller(
+            currentUser.uid
+          );
 
 
-          // Stop the temporary test stream.
-          // WebRTC will handle the real stream later.
-
-          stream
-            .getTracks()
-            .forEach(
-              (track) => {
-                track.stop();
-              }
-            );
+          webrtcConnected =
+            true;
 
 
           showStatus(
             "🎙️",
-            "Microphone ready",
-            "Your microphone permission has been granted. The live audio connection will be activated when the host connects you."
+            "YOU ARE LIVE",
+            "Your microphone is connected to the host."
           );
 
 
           liveButton.textContent =
-            "🎙️ MICROPHONE READY";
+            "🎙️ MICROPHONE LIVE";
+
+
+          liveButton.classList.add(
+            "active"
+          );
 
 
         } catch (error) {
 
           console.error(
-            "Microphone error:",
+            "WebRTC microphone error:",
             error
           );
 
 
+          webrtcConnected =
+            false;
+
+
+          liveButton.disabled =
+            false;
+
+
+          liveButton.textContent =
+            "🔴 PLAY LIVE AUDIO";
+
+
           showError(
-            "Microphone permission was not granted. Please allow microphone access in your browser."
+            "Unable to connect your microphone. Please allow microphone permission and try again."
           );
 
         }
+
+      }
+    );
+
+
+    // =================================================
+    // PAGE EXIT
+    // =================================================
+
+    window.addEventListener(
+      "beforeunload",
+      () => {
+
+        callerJoined =
+          false;
 
       }
     );
