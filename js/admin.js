@@ -1,57 +1,30 @@
-// Kulzzy Radio Live Community
-// Admin Control Panel
-
-import { auth, db } from "./firebase.js";
+// ======================================================
+// KULZZY RADIO NETWORK
+// LIVE COMMUNITY ADMIN CONTROL
+// js/admin.js
+// ======================================================
 
 import {
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
+  auth,
+  db
+} from "./firebase.js";
+
+import {
+  signOut,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 import {
   ref,
   onValue,
-  update
+  update,
+  remove
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
-
-// ======================================================
-// YOUR ADMIN EMAIL
-// ======================================================
-
-const ADMIN_EMAIL = "dstnewz.ng@gmail.com";
-
-
-// ======================================================
-// PAGE ELEMENTS
-// ======================================================
-
-const loginBox = document.getElementById("loginBox");
-const adminPanel = document.getElementById("adminPanel");
-
-const emailInput = document.getElementById("adminEmail");
-const passwordInput = document.getElementById("adminPassword");
-
-const loginButton = document.getElementById("loginButton");
-const logoutButton = document.getElementById("logoutButton");
-
-const callersList = document.getElementById("callersList");
-
-const generalMuteButton =
-  document.getElementById("generalMuteButton");
-
-const allowOneButton =
-  document.getElementById("allowOneButton");
-
-const adminMessage =
-  document.getElementById("adminMessage");
-
-const controlMessage =
-  document.getElementById("controlMessage");
-
-const callerCount =
-  document.getElementById("callerCount");
+import {
+  connectHost,
+  closeWebRTC
+} from "./webrtc.js";
 
 
 // ======================================================
@@ -66,178 +39,128 @@ let allowOneMode = false;
 
 let selectedCaller = null;
 
+let connectedCaller = null;
+
 
 // ======================================================
-// MESSAGE
+// ELEMENTS
+// ======================================================
+
+const callersContainer =
+  document.getElementById(
+    "callersContainer"
+  );
+
+const callerCount =
+  document.getElementById(
+    "callerCount"
+  );
+
+const generalMuteBtn =
+  document.getElementById(
+    "generalMuteBtn"
+  );
+
+const allowOneBtn =
+  document.getElementById(
+    "allowOneBtn"
+  );
+
+const generalMuteStatus =
+  document.getElementById(
+    "generalMuteStatus"
+  );
+
+const logoutBtn =
+  document.getElementById(
+    "logoutBtn"
+  );
+
+
+// ======================================================
+// OPTIONAL MESSAGE ELEMENT
 // ======================================================
 
 function showMessage(message) {
 
-  if (adminMessage) {
-    adminMessage.textContent = message;
-  }
-
-  if (controlMessage) {
-    controlMessage.textContent = message;
-  }
-
-}
-
-
-// ======================================================
-// LOGIN
-// ======================================================
-
-if (loginButton) {
-
-  loginButton.addEventListener("click", async () => {
-
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
-
-
-    if (!email || !password) {
-
-      showMessage(
-        "Please enter your admin email and password."
-      );
-
-      return;
-
-    }
-
-
-    if (email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
-
-      showMessage(
-        "This email is not authorized."
-      );
-
-      return;
-
-    }
-
-
-    loginButton.disabled = true;
-    loginButton.textContent = "LOGGING IN...";
-
-
-    try {
-
-      await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
-      showMessage(
-        "Login successful."
-      );
-
-    } catch (error) {
-
-      console.error("Login error:", error);
-
-      showMessage(
-        "Login failed. Check your email and password."
-      );
-
-    }
-
-
-    loginButton.disabled = false;
-    loginButton.textContent = "LOGIN";
-
-  });
-
-}
-
-
-// ======================================================
-// AUTH STATE
-// ======================================================
-
-onAuthStateChanged(auth, (user) => {
-
-  if (!user) {
-
-    if (loginBox) {
-      loginBox.style.display = "block";
-    }
-
-    if (adminPanel) {
-      adminPanel.style.display = "none";
-    }
-
-    return;
-
-  }
-
-
-  // Make sure only your admin email can use the panel
-
-  if (
-    !user.email ||
-    user.email.toLowerCase() !==
-    ADMIN_EMAIL.toLowerCase()
-  ) {
-
-    showMessage(
-      "Unauthorized account."
+  let messageBox =
+    document.getElementById(
+      "adminMessage"
     );
 
-    signOut(auth);
 
-    return;
+  if (!messageBox) {
 
-  }
-
-
-  // Hide login
-
-  if (loginBox) {
-    loginBox.style.display = "none";
-  }
-
-
-  // Show admin panel
-
-  if (adminPanel) {
-    adminPanel.style.display = "block";
-  }
-
-
-  // Start listening for callers
-
-  startCallerListener();
-
-});
-
-
-// ======================================================
-// LOGOUT
-// ======================================================
-
-if (logoutButton) {
-
-  logoutButton.addEventListener("click", async () => {
-
-    try {
-
-      await signOut(auth);
-
-    } catch (error) {
-
-      console.error(
-        "Logout error:",
-        error
+    messageBox =
+      document.createElement(
+        "div"
       );
+
+    messageBox.id =
+      "adminMessage";
+
+    messageBox.style.margin =
+      "12px 0";
+
+    messageBox.style.padding =
+      "10px";
+
+    messageBox.style.borderRadius =
+      "8px";
+
+    messageBox.style.background =
+      "#10284d";
+
+    messageBox.style.color =
+      "#ffffff";
+
+    messageBox.style.textAlign =
+      "center";
+
+    const parent =
+      callersContainer?.parentElement ||
+      document.body;
+
+    parent.prepend(
+      messageBox
+    );
+
+  }
+
+
+  messageBox.textContent =
+    message;
+
+}
+
+
+// ======================================================
+// AUTHENTICATION
+// ======================================================
+
+onAuthStateChanged(
+  auth,
+  (user) => {
+
+    if (!user) {
+
+      window.location.href =
+        "admin.html";
+
+      return;
 
     }
 
-  });
 
-}
+    console.log(
+      "Admin authenticated:",
+      user.uid
+    );
+
+    startCallerListener();
+
+  }
+);
 
 
 // ======================================================
@@ -247,138 +170,219 @@ if (logoutButton) {
 function startCallerListener() {
 
   const callersRef =
-    ref(db, "callers");
+    ref(
+      db,
+      "callers"
+    );
 
 
   onValue(
     callersRef,
-
     (snapshot) => {
 
-      callers =
+      const data =
         snapshot.val() || {};
+
+
+      callers = {};
+
+
+      Object.keys(data).forEach(
+        (uid) => {
+
+          const caller =
+            data[uid];
+
+
+          /*
+           * Only display callers who are
+           * currently online.
+           */
+
+          if (
+            caller &&
+            caller.online !== false
+          ) {
+
+            callers[uid] =
+              caller;
+
+          }
+
+        }
+      );
 
 
       renderCallers();
 
     },
-
     (error) => {
 
       console.error(
-        "Database listener error:",
+        "Unable to read callers from Firebase:",
         error
       );
 
-      showMessage(
-        "Unable to read callers from Firebase."
-      );
+
+      if (callersContainer) {
+
+        callersContainer.innerHTML =
+          `
+          <div style="
+            padding:20px;
+            text-align:center;
+            color:#ff7777;
+          ">
+            Unable to read callers from Firebase.
+          </div>
+          `;
+
+      }
 
     }
-
   );
 
 }
 
 
 // ======================================================
-// DISPLAY CALLERS
+// RENDER CALLERS
 // ======================================================
 
 function renderCallers() {
 
-  if (!callersList) return;
-
-
-  callersList.innerHTML = "";
-
-
-  const entries =
-    Object.entries(callers);
-
-
-  const onlineCallers =
-    entries.filter(([uid, caller]) => {
-
-      return (
-        caller &&
-        caller.online !== false &&
-        caller.status !== "offline"
-      );
-
-    });
+  const ids =
+    Object.keys(callers);
 
 
   if (callerCount) {
 
     callerCount.textContent =
-      onlineCallers.length;
+      ids.length;
 
   }
 
 
-  if (onlineCallers.length === 0) {
-
-    callersList.innerHTML = `
-
-      <div class="empty-callers">
-
-        📭 No callers connected.
-
-      </div>
-
-    `;
+  if (!callersContainer) {
 
     return;
 
   }
 
 
-  onlineCallers.forEach(
-    ([uid, caller]) => {
+  if (ids.length === 0) {
+
+    callersContainer.innerHTML =
+      `
+      <div style="
+        padding:25px;
+        text-align:center;
+        color:#9aa9c2;
+      ">
+        📭 No callers connected.
+      </div>
+      `;
+
+    return;
+
+  }
+
+
+  callersContainer.innerHTML =
+    "";
+
+
+  ids.forEach(
+    (uid) => {
+
+      const caller =
+        callers[uid];
+
 
       const card =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
 
       card.className =
         "caller-card";
 
 
-      const phone =
-        caller.phone || "Unknown";
-
-
-      const muted =
+      const isMuted =
         caller.muted === true;
 
 
-      const allowed =
-        caller.allowedToSpeak === true;
+      const isAllowed =
+        caller.allowedToSpeak === true &&
+        caller.muted === false;
 
 
-      card.innerHTML = `
+      const status =
+        caller.status ||
+        "waiting";
 
-        <div class="caller-information">
 
-          <div class="caller-icon">
-            👤
-          </div>
+      // ==========================================
+      // STATUS TEXT
+      // ==========================================
+
+      let statusText =
+        "⏳ Waiting";
+
+
+      if (isAllowed) {
+
+        statusText =
+          "🎙️ Speaking";
+
+      } else if (isMuted) {
+
+        statusText =
+          "🔇 Muted";
+
+      } else if (
+        status === "offline"
+      ) {
+
+        statusText =
+          "⚫ Offline";
+
+      }
+
+
+      // ==========================================
+      // CARD
+      // ==========================================
+
+      card.innerHTML =
+        `
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:10px;
+          margin-bottom:10px;
+        ">
 
           <div>
 
-            <div class="caller-phone">
-              ${escapeHTML(phone)}
+            <div style="
+              font-size:16px;
+              font-weight:bold;
+            ">
+              👤 ${escapeHTML(
+                caller.phone ||
+                "Unknown caller"
+              )}
             </div>
 
-            <div class="caller-status">
-
-              ${getStatus(
-                caller.status,
-                muted,
-                allowed
-              )}
-
+            <div style="
+              margin-top:5px;
+              font-size:13px;
+              color:#cbd6e8;
+            ">
+              ${statusText}
             </div>
 
           </div>
@@ -386,10 +390,14 @@ function renderCallers() {
         </div>
 
 
-        <div class="caller-controls">
+        <div style="
+          display:flex;
+          flex-wrap:wrap;
+          gap:7px;
+        ">
 
           <button
-            class="allow-button"
+            class="caller-action allow-button"
             data-action="allow"
             data-uid="${uid}"
           >
@@ -398,12 +406,12 @@ function renderCallers() {
 
 
           <button
-            class="mute-button"
+            class="caller-action mute-button"
             data-action="mute"
             data-uid="${uid}"
           >
             ${
-              muted
+              isMuted
                 ? "🔊 UNMUTE"
                 : "🔇 MUTE"
             }
@@ -411,7 +419,7 @@ function renderCallers() {
 
 
           <button
-            class="disconnect-button"
+            class="caller-action disconnect-button"
             data-action="disconnect"
             data-uid="${uid}"
           >
@@ -419,108 +427,319 @@ function renderCallers() {
           </button>
 
         </div>
-
-      `;
-
-
-      callersList.appendChild(card);
-
-    }
-  );
+        `;
 
 
-  attachCallerButtons();
+      // ==========================================
+      // CARD STYLING
+      // ==========================================
 
-}
+      card.style.background =
+        "#0b2144";
 
+      card.style.border =
+        "1px solid #29456d";
 
-// ======================================================
-// CALLER STATUS
-// ======================================================
+      card.style.borderRadius =
+        "14px";
 
-function getStatus(
-  status,
-  muted,
-  allowed
-) {
+      card.style.padding =
+        "15px";
 
-  if (status === "disconnected") {
-
-    return "🔴 Disconnected";
-
-  }
+      card.style.marginBottom =
+        "10px";
 
 
-  if (muted) {
-
-    return "🔇 Muted";
-
-  }
-
-
-  if (allowed) {
-
-    return "🎙️ Allowed to speak";
-
-  }
-
-
-  return "⏳ Waiting";
-
-}
-
-
-// ======================================================
-// BUTTON EVENTS
-// ======================================================
-
-function attachCallerButtons() {
-
-  const buttons =
-    callersList.querySelectorAll(
-      "button[data-action]"
-    );
-
-
-  buttons.forEach(
-    (button) => {
-
-      button.addEventListener(
-        "click",
-        async () => {
-
-          const action =
-            button.dataset.action;
-
-          const uid =
-            button.dataset.uid;
-
-
-          if (action === "allow") {
-
-            await allowCaller(uid);
-
-          }
-
-
-          if (action === "mute") {
-
-            await toggleMute(uid);
-
-          }
-
-
-          if (action === "disconnect") {
-
-            await disconnectCaller(uid);
-
-          }
-
-        }
+      callersContainer.appendChild(
+        card
       );
 
     }
   );
+
+}
+
+
+// ======================================================
+// ESCAPE HTML
+// ======================================================
+
+function escapeHTML(value) {
+
+  return String(value)
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+// ======================================================
+// CALLER BUTTON ACTIONS
+// ======================================================
+
+if (callersContainer) {
+
+  callersContainer.addEventListener(
+    "click",
+    async (event) => {
+
+      const button =
+        event.target.closest(
+          "button[data-action]"
+        );
+
+
+      if (!button) {
+
+        return;
+
+      }
+
+
+      const uid =
+        button.dataset.uid;
+
+
+      const action =
+        button.dataset.action;
+
+
+      if (!uid) {
+
+        return;
+
+      }
+
+
+      if (action === "allow") {
+
+        await allowCaller(
+          uid
+        );
+
+      }
+
+
+      if (action === "mute") {
+
+        await toggleMute(
+          uid
+        );
+
+      }
+
+
+      if (
+        action ===
+        "disconnect"
+      ) {
+
+        await disconnectCaller(
+          uid
+        );
+
+      }
+
+    }
+  );
+
+}
+
+
+// ======================================================
+// GENERAL MUTE
+// ======================================================
+
+if (generalMuteBtn) {
+
+  generalMuteBtn.addEventListener(
+    "click",
+    async () => {
+
+      await activateGeneralMute();
+
+    }
+  );
+
+}
+
+
+// ======================================================
+// GENERAL MUTE FUNCTION
+// ======================================================
+
+async function activateGeneralMute() {
+
+  try {
+
+    generalMute =
+      true;
+
+
+    const updates =
+      {};
+
+
+    Object.keys(callers)
+      .forEach(
+        (uid) => {
+
+          updates[
+            `callers/${uid}/muted`
+          ] = true;
+
+
+          updates[
+            `callers/${uid}/allowedToSpeak`
+          ] = false;
+
+
+          updates[
+            `callers/${uid}/status`
+          ] = "muted";
+
+        }
+      );
+
+
+    if (
+      Object.keys(updates)
+        .length > 0
+    ) {
+
+      await update(
+        ref(db),
+        updates
+      );
+
+    }
+
+
+    /*
+     * If there is an active WebRTC caller,
+     * close the host connection.
+     */
+
+    if (connectedCaller) {
+
+      try {
+
+        await closeWebRTC(
+          connectedCaller
+        );
+
+      } catch (error) {
+
+        console.error(
+          "WebRTC close error:",
+          error
+        );
+
+      }
+
+
+      connectedCaller =
+        null;
+
+    }
+
+
+    selectedCaller =
+      null;
+
+
+    updateGeneralMuteUI();
+
+
+    showMessage(
+      "🔇 General Mute is active. All callers are muted."
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "General mute error:",
+      error
+    );
+
+
+    showMessage(
+      "Unable to activate General Mute."
+    );
+
+  }
+
+}
+
+
+// ======================================================
+// GENERAL MUTE + ALLOW ONE PERSON
+// ======================================================
+
+if (allowOneBtn) {
+
+  allowOneBtn.addEventListener(
+    "click",
+    async () => {
+
+      await activateAllowOneMode();
+
+    }
+  );
+
+}
+
+
+// ======================================================
+// ACTIVATE ALLOW ONE MODE
+// ======================================================
+
+async function activateAllowOneMode() {
+
+  try {
+
+    allowOneMode =
+      true;
+
+    generalMute =
+      true;
+
+
+    updateGeneralMuteUI();
+
+
+    showMessage(
+      "🎙️ Allow 1 Person mode is active. Choose ALLOW on one caller."
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Allow one mode error:",
+      error
+    );
+
+  }
 
 }
 
@@ -531,13 +750,14 @@ function attachCallerButtons() {
 
 async function allowCaller(uid) {
 
-  if (
-    generalMute &&
-    !allowOneMode
-  ) {
+  const caller =
+    callers[uid];
+
+
+  if (!caller) {
 
     showMessage(
-      "GENERAL MUTE is active. Choose ALLOW 1 PERSON first."
+      "Caller is no longer connected."
     );
 
     return;
@@ -547,50 +767,45 @@ async function allowCaller(uid) {
 
   try {
 
-    selectedCaller = uid;
-
-
-    // In Allow-1 mode, make sure everyone else stays muted
+    // ==========================================
+    // ALLOW 1 PERSON MODE
+    // ==========================================
 
     if (allowOneMode) {
 
-      const updates = {};
+      const updates =
+        {};
 
 
-      Object.keys(callers).forEach(
-        (otherUid) => {
+      Object.keys(callers)
+        .forEach(
+          (otherUid) => {
 
-          if (
-            otherUid === uid
-          ) return;
+            if (
+              otherUid === uid
+            ) {
 
+              return;
 
-          const caller =
-            callers[otherUid];
-
-
-          if (!caller) return;
+            }
 
 
-          if (caller.online === false) return;
+            updates[
+              `callers/${otherUid}/muted`
+            ] = true;
 
 
-          updates[
-            `callers/${otherUid}/muted`
-          ] = true;
+            updates[
+              `callers/${otherUid}/allowedToSpeak`
+            ] = false;
 
 
-          updates[
-            `callers/${otherUid}/allowedToSpeak`
-          ] = false;
+            updates[
+              `callers/${otherUid}/status`
+            ] = "muted";
 
-
-          updates[
-            `callers/${otherUid}/status`
-          ] = "muted";
-
-        }
-      );
+          }
+        );
 
 
       updates[
@@ -615,6 +830,10 @@ async function allowCaller(uid) {
 
     } else {
 
+      // ========================================
+      // NORMAL ALLOW
+      // ========================================
+
       await update(
         ref(
           db,
@@ -622,11 +841,14 @@ async function allowCaller(uid) {
         ),
         {
 
-          muted: false,
+          muted:
+            false,
 
-          allowedToSpeak: true,
+          allowedToSpeak:
+            true,
 
-          status: "speaking"
+          status:
+            "speaking"
 
         }
       );
@@ -634,8 +856,30 @@ async function allowCaller(uid) {
     }
 
 
+    // ==========================================
+    // CONNECT HOST TO CALLER
+    // ==========================================
+
     showMessage(
-      "🎙️ Caller is now allowed to speak."
+      "🎙️ Caller allowed. Connecting microphone..."
+    );
+
+
+    await connectHost(
+      uid
+    );
+
+
+    connectedCaller =
+      uid;
+
+
+    selectedCaller =
+      uid;
+
+
+    showMessage(
+      "🎙️ Caller is connected to your control device."
     );
 
 
@@ -646,8 +890,9 @@ async function allowCaller(uid) {
       error
     );
 
+
     showMessage(
-      "Unable to allow this caller."
+      "Unable to connect this caller."
     );
 
   }
@@ -656,7 +901,7 @@ async function allowCaller(uid) {
 
 
 // ======================================================
-// MUTE / UNMUTE
+// MUTE / UNMUTE CALLER
 // ======================================================
 
 async function toggleMute(uid) {
@@ -665,52 +910,173 @@ async function toggleMute(uid) {
     callers[uid];
 
 
-  if (!caller) return;
+  if (!caller) {
+
+    showMessage(
+      "Caller is no longer connected."
+    );
+
+    return;
+
+  }
 
 
-  const isMuted =
+  const currentlyMuted =
     caller.muted === true;
 
 
   try {
 
-    await update(
-      ref(
-        db,
-        `callers/${uid}`
-      ),
-      {
+    if (currentlyMuted) {
 
-        muted: !isMuted,
+      // ========================================
+      // UNMUTE
+      // ========================================
 
-        allowedToSpeak:
-          isMuted,
+      if (
+        allowOneMode &&
+        selectedCaller &&
+        selectedCaller !== uid
+      ) {
 
-        status:
-          isMuted
-            ? "speaking"
-            : "muted"
+        showMessage(
+          "Only one caller can be allowed in this mode."
+        );
+
+        return;
 
       }
-    );
 
 
-    showMessage(
-      isMuted
-        ? "🎙️ Caller microphone allowed."
-        : "🔇 Caller muted."
-    );
+      await update(
+        ref(
+          db,
+          `callers/${uid}`
+        ),
+        {
+
+          muted:
+            false,
+
+          allowedToSpeak:
+            true,
+
+          status:
+            "speaking"
+
+        }
+      );
+
+
+      // ========================================
+      // CONNECT IF NOT ALREADY CONNECTED
+      // ========================================
+
+      if (
+        connectedCaller !== uid
+      ) {
+
+        showMessage(
+          "🎙️ Connecting caller microphone..."
+        );
+
+
+        await connectHost(
+          uid
+        );
+
+
+        connectedCaller =
+          uid;
+
+        selectedCaller =
+          uid;
+
+      }
+
+
+      showMessage(
+        "🔊 Caller microphone is unmuted."
+      );
+
+
+    } else {
+
+      // ========================================
+      // MUTE
+      // ========================================
+
+      await update(
+        ref(
+          db,
+          `callers/${uid}`
+        ),
+        {
+
+          muted:
+            true,
+
+          allowedToSpeak:
+            false,
+
+          status:
+            "muted"
+
+        }
+      );
+
+
+      /*
+       * Close the current WebRTC host
+       * connection when the caller is muted.
+       */
+
+      if (
+        connectedCaller === uid
+      ) {
+
+        try {
+
+          await closeWebRTC(
+            uid
+          );
+
+        } catch (error) {
+
+          console.error(
+            "WebRTC mute close error:",
+            error
+          );
+
+        }
+
+
+        connectedCaller =
+          null;
+
+        selectedCaller =
+          null;
+
+      }
+
+
+      showMessage(
+        "🔇 Caller microphone muted."
+      );
+
+    }
 
 
   } catch (error) {
 
     console.error(
-      "Mute error:",
+      "Mute/unmute error:",
       error
     );
 
+
     showMessage(
-      "Unable to change microphone status."
+      "Unable to change caller microphone."
     );
 
   }
@@ -719,10 +1085,12 @@ async function toggleMute(uid) {
 
 
 // ======================================================
-// DISCONNECT
+// DISCONNECT CALLER
 // ======================================================
 
-async function disconnectCaller(uid) {
+async function disconnectCaller(
+  uid
+) {
 
   try {
 
@@ -733,16 +1101,49 @@ async function disconnectCaller(uid) {
       ),
       {
 
-        status: "disconnected",
+        online:
+          false,
 
-        muted: true,
+        status:
+          "disconnected",
 
-        allowedToSpeak: false,
+        muted:
+          true,
 
-        online: false
+        allowedToSpeak:
+          false
 
       }
     );
+
+
+    if (
+      connectedCaller === uid
+    ) {
+
+      try {
+
+        await closeWebRTC(
+          uid
+        );
+
+      } catch (error) {
+
+        console.error(
+          "WebRTC disconnect error:",
+          error
+        );
+
+      }
+
+
+      connectedCaller =
+        null;
+
+      selectedCaller =
+        null;
+
+    }
 
 
     showMessage(
@@ -757,6 +1158,7 @@ async function disconnectCaller(uid) {
       error
     );
 
+
     showMessage(
       "Unable to disconnect caller."
     );
@@ -767,93 +1169,111 @@ async function disconnectCaller(uid) {
 
 
 // ======================================================
-// GENERAL MUTE
+// GENERAL MUTE UI
 // ======================================================
 
-if (generalMuteButton) {
+function updateGeneralMuteUI() {
 
-  generalMuteButton.addEventListener(
+  if (
+    generalMuteStatus
+  ) {
+
+    if (
+      allowOneMode
+    ) {
+
+      generalMuteStatus.textContent =
+        "🎙️ Allow 1 Person mode is active. Choose ALLOW for one caller.";
+
+    } else if (
+      generalMute
+    ) {
+
+      generalMuteStatus.textContent =
+        "🔇 General Mute is active. All callers are muted.";
+
+    } else {
+
+      generalMuteStatus.textContent =
+        "🎙️ General Mute is off.";
+
+    }
+
+  }
+
+
+  if (
+    generalMuteBtn
+  ) {
+
+    generalMuteBtn.style.opacity =
+      generalMute
+        ? "1"
+        : "0.7";
+
+  }
+
+
+  if (
+    allowOneBtn
+  ) {
+
+    allowOneBtn.style.opacity =
+      allowOneMode
+        ? "1"
+        : "0.7";
+
+  }
+
+}
+
+
+// ======================================================
+// LOGOUT
+// ======================================================
+
+if (logoutBtn) {
+
+  logoutBtn.addEventListener(
     "click",
     async () => {
 
       try {
 
-        generalMute = true;
+        if (connectedCaller) {
 
-        allowOneMode = false;
+          try {
 
-        selectedCaller = null;
+            await closeWebRTC(
+              connectedCaller
+            );
 
+          } catch (error) {
 
-        const updates = {};
-
-
-        Object.keys(callers).forEach(
-          (uid) => {
-
-            const caller =
-              callers[uid];
-
-
-            if (!caller) return;
-
-            if (caller.online === false) return;
-
-
-            updates[
-              `callers/${uid}/muted`
-            ] = true;
-
-
-            updates[
-              `callers/${uid}/allowedToSpeak`
-            ] = false;
-
-
-            updates[
-              `callers/${uid}/status`
-            ] = "muted";
+            console.error(
+              "Logout WebRTC error:",
+              error
+            );
 
           }
-        );
-
-
-        if (
-          Object.keys(updates).length
-        ) {
-
-          await update(
-            ref(db),
-            updates
-          );
 
         }
 
 
-        generalMuteButton.classList.add(
-          "active"
+        await signOut(
+          auth
         );
 
 
-        allowOneButton.classList.remove(
-          "active"
-        );
-
-
-        showMessage(
-          "🔇 GENERAL MUTE activated. Everyone is muted."
-        );
+        window.location.href =
+          "admin.html";
 
 
       } catch (error) {
 
         console.error(
-          "General mute error:",
+          "Logout error:",
           error
-        );
-
-        showMessage(
-          "Unable to activate General Mute."
         );
 
       }
@@ -865,134 +1285,12 @@ if (generalMuteButton) {
 
 
 // ======================================================
-// GENERAL MUTE + ALLOW ONE
+// INITIAL UI
 // ======================================================
 
-if (allowOneButton) {
-
-  allowOneButton.addEventListener(
-    "click",
-    async () => {
-
-      try {
-
-        generalMute = true;
-
-        allowOneMode = true;
-
-        selectedCaller = null;
+updateGeneralMuteUI();
 
 
-        const updates = {};
-
-
-        Object.keys(callers).forEach(
-          (uid) => {
-
-            const caller =
-              callers[uid];
-
-
-            if (!caller) return;
-
-            if (caller.online === false) return;
-
-
-            updates[
-              `callers/${uid}/muted`
-            ] = true;
-
-
-            updates[
-              `callers/${uid}/allowedToSpeak`
-            ] = false;
-
-
-            updates[
-              `callers/${uid}/status`
-            ] = "muted";
-
-          }
-        );
-
-
-        if (
-          Object.keys(updates).length
-        ) {
-
-          await update(
-            ref(db),
-            updates
-          );
-
-        }
-
-
-        generalMuteButton.classList.remove(
-          "active"
-        );
-
-
-        allowOneButton.classList.add(
-          "active"
-        );
-
-
-        showMessage(
-          "🔇 Everyone is muted. Select ALLOW for one person."
-        );
-
-
-      } catch (error) {
-
-        console.error(
-          "Allow-one error:",
-          error
-        );
-
-        showMessage(
-          "Unable to activate Allow 1 Person mode."
-        );
-
-      }
-
-    }
-  );
-
-}
-
-
-// ======================================================
-// HTML SECURITY
-// ======================================================
-
-function escapeHTML(value) {
-
-  return String(value)
-
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-
-    .replace(
-      /</g,
-      "&lt;"
-    )
-
-    .replace(
-      />/g,
-      "&gt;"
-    )
-
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-
-    .replace(
-      /'/g,
-      "&#039;"
-    );
-
-}
+console.log(
+  "Kulzzy Radio Live Community Admin loaded."
+);
