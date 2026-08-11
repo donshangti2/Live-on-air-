@@ -8,7 +8,6 @@ import { db } from "./firebase.js";
 import {
   ref,
   set,
-  update,
   onValue,
   onChildAdded,
   remove
@@ -54,7 +53,7 @@ function createConnection(callerId, role) {
 
 
   // ====================================================
-  // CALLER ICE
+  // ICE CANDIDATES
   // ====================================================
 
   pc.onicecandidate = async (event) => {
@@ -101,7 +100,7 @@ function createConnection(callerId, role) {
 
 
   // ====================================================
-  // HOST RECEIVES CALLER AUDIO
+  // RECEIVE CALLER AUDIO ON HOST
   // ====================================================
 
   pc.ontrack = (event) => {
@@ -185,8 +184,9 @@ export async function connectCaller(
     callerId;
 
 
-  // Get microphone ONLY when caller has
-  // been allowed to speak.
+  // ====================================================
+  // GET MICROPHONE
+  // ====================================================
 
   localStream =
     await navigator.mediaDevices
@@ -442,7 +442,7 @@ export async function connectHost(
 
 
   // ====================================================
-  // CALLER ICE
+  // CALLER ICE CANDIDATES
   // ====================================================
 
   onChildAdded(
@@ -498,7 +498,7 @@ export async function connectHost(
 
 
 // ======================================================
-// CLOSE
+// CLOSE WEBRTC
 // ======================================================
 
 export async function closeWebRTC(
@@ -571,4 +571,4 @@ export function muteLocalMicrophone(
       }
     );
 
-    }
+  }
