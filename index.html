@@ -3,1431 +3,1227 @@
 
 <head>
 
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
 
-  <title>Kulzzy Radio - Live Community</title>
+<title>Kulzzy Radio - Live Community</title>
 
+<style>
 
-  <style>
-#kulzzyLiveCommunity {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  position: relative;
-  clear: both;
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  padding:0;
+  min-height:100%;
+}
+
+body{
+  background:#001a3a;
+  color:#fff;
+  font-family:Arial,Helvetica,sans-serif;
+}
+
+#kulzzyLiveCommunity{
+  width:100%;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+}
+
+#kulzzyLiveCommunity *,
+#kulzzyLiveCommunity *::before,
+#kulzzyLiveCommunity *::after{
+  box-sizing:border-box;
+}
+
+.kulzzy-container{
+  width:100%;
+  max-width:650px;
+  margin:0 auto;
+  padding:20px;
+}
+
+.kulzzy-community-box{
+  width:100%;
+  background:#062b57;
+  border-radius:28px;
+  padding:40px 30px;
+  box-shadow:0 20px 50px rgba(0,0,0,.3);
+}
+
+.kulzzy-live-badge{
+  display:table;
+  margin:0 auto 35px;
+  background:#f30000;
+  color:#fff;
+  padding:13px 25px;
+  border-radius:40px;
+  font-weight:bold;
+  font-size:18px;
+}
+
+.kulzzy-live-dot{
+  display:inline-block;
+  width:15px;
+  height:15px;
+  background:#fff;
+  border-radius:50%;
+  margin-right:10px;
+}
+
+.kulzzy-title{
+  text-align:center;
+  font-size:45px;
+  line-height:1.1;
+  margin:0 0 25px;
+}
+
+.kulzzy-yellow{
+  color:#ffd000;
+}
+
+.kulzzy-description{
+  text-align:center;
+  color:#c7d5e8;
+  font-size:19px;
+  line-height:1.6;
+  margin:0 0 35px;
+}
+
+.kulzzy-label{
+  display:block;
+  font-weight:bold;
+  font-size:16px;
+  margin:0 0 10px;
+}
+
+#kulzzyLiveCommunity .kulzzy-phone{
+  width:100%;
+  padding:18px;
+  border-radius:15px;
+  border:1px solid #46688f;
+  background:#001d40;
+  color:#fff;
+  font-size:18px;
+  outline:none;
+}
+
+#kulzzyLiveCommunity .kulzzy-phone:focus{
+  border-color:#ffd000;
+}
+
+.kulzzy-join-button{
+  width:100%;
+  margin-top:20px;
+  padding:18px;
+  border:0;
+  border-radius:15px;
+  background:#ffd000;
+  color:#001a3a;
+  font-size:18px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.kulzzy-join-button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+.kulzzy-error{
+  min-height:20px;
+  color:#ff8d8d;
+  margin-top:15px;
+  text-align:center;
+  font-size:14px;
+  line-height:1.4;
+}
+
+.kulzzy-status-box{
+  margin-top:25px;
+  background:#001d40;
+  border:1px solid #46688f;
+  border-radius:18px;
+  padding:30px 20px;
+  text-align:center;
+}
+
+.kulzzy-status-icon{
+  font-size:55px;
+  margin-bottom:12px;
+}
+
+.kulzzy-status-title{
+  font-size:25px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.kulzzy-status-text{
+  color:#c7d5e8;
+  font-size:17px;
+  line-height:1.5;
+}
+
+.kulzzy-mic-controls{
+  margin-top:25px;
+  text-align:center;
+}
+
+.kulzzy-mic-button{
+  width:100%;
+  padding:20px;
+  border:0;
+  border-radius:16px;
+  background:#ffd000;
+  color:#001a3a;
+  font-size:19px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 8px 20px rgba(0,0,0,.25);
+}
+
+.kulzzy-mic-button:active{
+  transform:scale(.98);
+}
+
+.kulzzy-mic-button.muted{
+  background:#d40000;
+  color:#fff;
+}
+
+.kulzzy-mic-button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+.kulzzy-mic-status{
+  margin-top:12px;
+  color:#c7d5e8;
+  font-size:14px;
+  line-height:1.5;
+}
+
+.kulzzy-hidden{
+  display:none !important;
+}
+
+.kulzzy-footer{
+  text-align:center;
+  color:#8198b7;
+  font-size:14px;
+  margin-top:30px;
+}
+
+@media(max-width:600px){
+
+  .kulzzy-container{
+    padding:12px;
   }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
 
+  .kulzzy-community-box{
+    padding:35px 20px;
+    border-radius:24px;
+  }
 
-    body {
+  .kulzzy-title{
+    font-size:38px;
+  }
 
-      min-height: 100vh;
+  .kulzzy-description{
+    font-size:17px;
+  }
 
-      background: #001a3a;
+  .kulzzy-live-badge{
+    font-size:16px;
+  }
 
-      color: #ffffff;
-
-      font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-      padding: 0;
-    }
-
-#kulzzyLiveCommunity,
-#kulzzyLiveCommunity * {
-  box-sizing: border-box;
 }
 
-#kulzzyLiveCommunity .container {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 0;
-}
-
-#kulzzyLiveCommunity .community-box {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-}
-    .container {
-
-      width: 100%;
-
-      max-width: 650px;
-
-      margin: auto;
-
-    }
-
-
-    .community-box {
-
-      background: #062b57;
-
-      border-radius: 28px;
-
-      padding: 40px 30px;
-
-      margin: 0;
-      box-shadow:
-        0 20px 50px
-        rgba(0,0,0,.3);
-
-    }
-
-
-    .live-badge {
-
-      display: table;
-
-      margin:
-        0 auto 35px;
-
-      background: #f30000;
-
-      color: #ffffff;
-
-      padding:
-        13px 25px;
-
-      border-radius: 40px;
-
-      font-weight: bold;
-
-      font-size: 18px;
-
-    }
-
-
-    .live-dot {
-
-      display: inline-block;
-
-      width: 15px;
-
-      height: 15px;
-
-      background: #ffffff;
-
-      border-radius: 50%;
-
-      margin-right: 10px;
-
-    }
-
-
-    h1 {
-
-      text-align: center;
-
-      font-size: 45px;
-
-      line-height: 1.1;
-
-      margin-bottom: 25px;
-
-    }
-
-
-    .yellow {
-
-      color: #ffd000;
-
-    }
-
-
-    .description {
-
-      text-align: center;
-
-      color: #c7d5e8;
-
-      font-size: 19px;
-
-      line-height: 1.6;
-
-      margin-bottom: 35px;
-
-    }
-
-
-    label {
-
-      display: block;
-
-      font-weight: bold;
-
-      font-size: 16px;
-
-      margin-bottom: 10px;
-
-    }
-
-
-    input {
-
-      width: 100%;
-
-      padding: 18px;
-
-      border-radius: 15px;
-
-      border:
-        1px solid #46688f;
-
-      background: #001d40;
-
-      color: #ffffff;
-
-      font-size: 18px;
-
-      outline: none;
-
-    }
-
-
-    input:focus {
-
-      border-color: #ffd000;
-
-    }
-
-
-    .join-button {
-
-      width: 100%;
-
-      margin-top: 20px;
-
-      padding: 18px;
-
-      border: none;
-
-      border-radius: 15px;
-
-      background: #ffd000;
-
-      color: #001a3a;
-
-      font-size: 18px;
-
-      font-weight: 900;
-
-      cursor: pointer;
-
-    }
-
-
-    .join-button:disabled {
-
-      opacity: .6;
-
-      cursor: not-allowed;
-
-    }
-
-
-    .status-box {
-
-      margin-top: 25px;
-
-      background: #001d40;
-
-      border:
-        1px solid #46688f;
-
-      border-radius: 18px;
-
-      padding: 30px 20px;
-
-      text-align: center;
-
-    }
-
-
-    .status-icon {
-
-      font-size: 55px;
-
-      margin-bottom: 12px;
-
-    }
-
-
-    .status-title {
-
-      font-size: 25px;
-
-      font-weight: bold;
-
-      margin-bottom: 10px;
-
-    }
-
-
-    .status-text {
-
-      color: #c7d5e8;
-
-      font-size: 17px;
-
-      line-height: 1.5;
-
-    }
-
-
-    /* ==================================================
-       MICROPHONE CONTROL
-       ================================================== */
-
-    .mic-controls {
-
-      margin-top: 25px;
-
-      text-align: center;
-
-    }
-
-
-    .mic-button {
-
-      width: 100%;
-
-      padding: 20px;
-
-      border: none;
-
-      border-radius: 16px;
-
-      background: #ffd000;
-
-      color: #001a3a;
-
-      font-size: 19px;
-
-      font-weight: 900;
-
-      cursor: pointer;
-
-      box-shadow:
-        0 8px 20px
-        rgba(0,0,0,.25);
-
-      transition:
-        transform .15s ease,
-        opacity .15s ease;
-
-    }
-
-
-    .mic-button:active {
-
-      transform: scale(.98);
-
-    }
-
-
-    .mic-button.muted {
-
-      background: #d40000;
-
-      color: #ffffff;
-
-    }
-
-
-    .mic-button:disabled {
-
-      opacity: .55;
-
-      cursor: not-allowed;
-
-    }
-
-
-    .mic-status {
-
-      margin-top: 12px;
-
-      color: #c7d5e8;
-
-      font-size: 14px;
-
-      line-height: 1.5;
-
-    }
-
-
-    .hidden {
-
-      display: none !important;
-
-    }
-
-
-    .error {
-
-      color: #ff8d8d;
-
-      margin-top: 15px;
-
-      text-align: center;
-
-      font-size: 14px;
-
-    }
-
-
-    .footer {
-
-      text-align: center;
-
-      color: #8198b7;
-
-      font-size: 14px;
-
-      margin-top: 30px;
-
-    }
-
-
-    @media (max-width: 600px) {
-
-      body {
-
-        padding: 12px;
-
-      }
-
-
-      .community-box {
-
-        margin-top: 40px;
-
-        padding:
-          35px 20px;
-
-      }
-
-
-      h1 {
-
-        font-size: 38px;
-
-      }
-
-
-      .description {
-
-        font-size: 17px;
-
-      }
-
-
-      .live-badge {
-
-        font-size: 16px;
-
-      }
-
-    }
-
-  </style>
+</style>
 
 </head>
 
 
 <body>
 
-
 <div id="kulzzyLiveCommunity">
-<div class="container">
 
-  <main class="community-box">
+  <div class="kulzzy-container">
 
+    <main class="kulzzy-community-box">
 
-    <div class="live-badge">
-
-      <span class="live-dot"></span>
-
-      LIVE COMMUNITY
-
-    </div>
-
-
-    <h1>
-
-      Join
-
-      <span class="yellow">
-        Kulzzy Radio
-      </span>
-
-    </h1>
-
-
-    <p class="description">
-
-      Join us live and get the opportunity
-      to speak on-air.
-      Enter your phone number below
-      to join the waiting queue.
-
-    </p>
-
-
-    <!-- =========================================
-         PHONE FORM
-    ========================================== -->
-
-    <div id="joinArea">
-
-
-      <label for="phoneNumber">
-
-        Your Phone Number
-
-      </label>
-
-
-      <input
-
-        type="tel"
-
-        id="phoneNumber"
-
-        placeholder="+2349017759411"
-
-        autocomplete="tel"
-
-      >
-
-
-      <button
-
-        type="button"
-
-        class="join-button"
-
-        id="joinButton"
-
-      >
-
-        🎙️ JOIN LIVE
-
-      </button>
-
-
-      <div
-
-        class="error"
-
-        id="errorMessage"
-
-      ></div>
-
-
-    </div>
-
-
-    <!-- =========================================
-         STATUS
-    ========================================== -->
-
-    <div
-
-      class="status-box hidden"
-
-      id="statusBox"
-
-    >
-
-
-      <div
-
-        class="status-icon"
-
-        id="statusIcon"
-
-      >
-
-        ⏳
-
+      <div class="kulzzy-live-badge">
+        <span class="kulzzy-live-dot"></span>
+        LIVE COMMUNITY
       </div>
 
 
-      <div
+      <h1 class="kulzzy-title">
 
-        class="status-title"
+        Join
+        <span class="kulzzy-yellow">
+          Kulzzy Radio
+        </span>
 
-        id="statusTitle"
-
-      >
-
-        You're in the queue
-
-      </div>
+      </h1>
 
 
-      <div
+      <p class="kulzzy-description">
 
-        class="status-text"
+        Join us live and get the opportunity
+        to speak on-air.
+        Enter your phone number below
+        to join the waiting queue.
 
-        id="statusText"
-
-      >
-
-        You are connected.
-        Please wait for the host
-        to allow you to speak.
-
-      </div>
+      </p>
 
 
-      <!-- =========================================
-           MICROPHONE CONTROLS
-      ========================================== -->
+      <!-- JOIN AREA -->
 
-      <div
+      <div id="joinArea">
 
-        class="mic-controls hidden"
+        <label
+          class="kulzzy-label"
+          for="phoneNumber"
+        >
+          Your Phone Number
+        </label>
 
-        id="micControls"
 
-      >
-
-        <button
-
-          type="button"
-
-          class="mic-button"
-
-          id="micButton"
-
+        <input
+          class="kulzzy-phone"
+          type="tel"
+          id="phoneNumber"
+          placeholder="+2349017759411"
+          autocomplete="tel"
+          inputmode="tel"
         >
 
-          🎙️ START TALKING
 
+        <button
+          type="button"
+          class="kulzzy-join-button"
+          id="joinButton"
+        >
+          🎙️ JOIN LIVE
         </button>
 
 
         <div
+          class="kulzzy-error"
+          id="errorMessage"
+        ></div>
 
-          class="mic-status"
+      </div>
 
-          id="micStatus"
 
+      <!-- STATUS -->
+
+      <div
+        class="kulzzy-status-box kulzzy-hidden"
+        id="statusBox"
+      >
+
+        <div
+          class="kulzzy-status-icon"
+          id="statusIcon"
+        >
+          ⏳
+        </div>
+
+
+        <div
+          class="kulzzy-status-title"
+          id="statusTitle"
+        >
+          You're in the queue
+        </div>
+
+
+        <div
+          class="kulzzy-status-text"
+          id="statusText"
+        >
+          You are connected.
+          Please wait for the host
+          to allow you to speak.
+        </div>
+
+
+        <!-- MICROPHONE -->
+
+        <div
+          class="kulzzy-mic-controls kulzzy-hidden"
+          id="micControls"
         >
 
-          Your microphone will start when you tap
-          the button above.
+          <button
+            type="button"
+            class="kulzzy-mic-button"
+            id="micButton"
+          >
+            🎙️ START TALKING
+          </button>
+
+
+          <div
+            class="kulzzy-mic-status"
+            id="micStatus"
+          >
+            Tap the button to start talking on-air.
+          </div>
 
         </div>
 
       </div>
 
 
-    </div>
+      <div class="kulzzy-footer">
 
+        Kulzzy Radio Network
+        •
+        Celebrating Lives Everyday
 
-    <div class="footer">
+      </div>
 
-      Kulzzy Radio Network
-      •
-      Celebrating Lives Everyday
+    </main>
 
-    </div>
-
-
-  </main>
-
+  </div>
 
 </div>
 
 
-
 <script type="module">
 
+/*
+=========================================================
+KULZZY RADIO NETWORK
+LIVE COMMUNITY
+GITHUB VERSION
 
-  // =====================================================
-  // KULZZY RADIO NETWORK
-  // LIVE COMMUNITY
-  // PUBLIC PAGE
-  //
-  // IMPORTANT:
-  //
-  // DO NOT CHANGE:
-  //
-  // admin.js
-  // firebase.js
-  // webrtc.js
-  //
-  // This page uses the existing WebRTC engine.
-  // =====================================================
+IMPORTANT:
 
+DO NOT CHANGE firebase.js
+DO NOT CHANGE webrtc.js
 
-  import {
+This index.html uses:
 
-    auth,
+./js/firebase.js
+./js/webrtc.js
+=========================================================
+*/
 
-    db
 
-  } from "./js/firebase.js";
+import {
+  auth,
+  db
+} from "./js/firebase.js";
 
 
-  import {
+import {
+  signInAnonymously,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
-    signInAnonymously,
 
-    onAuthStateChanged
+import {
+  ref,
+  update,
+  onValue,
+  onDisconnect
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
-  } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
+import {
+  connectCaller,
+  muteLocalMicrophone,
+  closeWebRTC
+} from "./js/webrtc.js";
 
-  import {
 
-    ref,
 
-    update,
+/*
+=========================================================
+ELEMENTS
+=========================================================
+*/
 
-    onValue,
+const phoneInput =
+  document.getElementById("phoneNumber");
 
-    onDisconnect
+const joinButton =
+  document.getElementById("joinButton");
 
-  } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+const joinArea =
+  document.getElementById("joinArea");
 
+const statusBox =
+  document.getElementById("statusBox");
 
-  import {
+const statusIcon =
+  document.getElementById("statusIcon");
 
-    connectCaller,
+const statusTitle =
+  document.getElementById("statusTitle");
 
-    closeWebRTC,
+const statusText =
+  document.getElementById("statusText");
 
-    muteLocalMicrophone
+const errorMessage =
+  document.getElementById("errorMessage");
 
-  } from "./js/webrtc.js";
+const micControls =
+  document.getElementById("micControls");
 
+const micButton =
+  document.getElementById("micButton");
 
+const micStatus =
+  document.getElementById("micStatus");
 
-  // =====================================================
-  // ELEMENTS
-  // =====================================================
 
 
-  const phoneInput =
-    document.getElementById(
-      "phoneNumber"
-    );
+/*
+=========================================================
+VARIABLES
+=========================================================
+*/
 
+let currentUser = null;
 
-  const joinButton =
-    document.getElementById(
-      "joinButton"
-    );
+let callerUid = null;
 
+let callerRef = null;
 
-  const joinArea =
-    document.getElementById(
-      "joinArea"
-    );
+let callerUnsubscribe = null;
 
+let callerListenerStarted = false;
 
-  const statusBox =
-    document.getElementById(
-      "statusBox"
-    );
+let currentPhone = null;
 
+let microphoneMuted = true;
 
-  const statusIcon =
-    document.getElementById(
-      "statusIcon"
-    );
+let webRTCConnected = false;
 
+let firebaseReady = false;
 
-  const statusTitle =
-    document.getElementById(
-      "statusTitle"
-    );
 
 
-  const statusText =
-    document.getElementById(
-      "statusText"
-    );
+/*
+=========================================================
+FIREBASE AUTH READY PROMISE
+=========================================================
 
+This prevents the JOIN button from being pressed
+before Firebase anonymous authentication is ready.
+=========================================================
+*/
 
-  const errorMessage =
-    document.getElementById(
-      "errorMessage"
-    );
+let resolveFirebaseReady;
 
+const firebaseReadyPromise =
+  new Promise((resolve) => {
 
-  const micControls =
-    document.getElementById(
-      "micControls"
-    );
+    resolveFirebaseReady = resolve;
 
+  });
 
-  const micButton =
-    document.getElementById(
-      "micButton"
-    );
 
 
-  const micStatus =
-    document.getElementById(
-      "micStatus"
-    );
+/*
+=========================================================
+ERROR
+=========================================================
+*/
 
+function showError(message){
 
+  if(errorMessage){
 
-  // =====================================================
-  // VARIABLES
-  // =====================================================
+    errorMessage.textContent =
+      message;
 
+  }
 
-  let currentUser =
-    null;
+}
 
 
-  let callerUid =
-    null;
+function clearError(){
 
+  if(errorMessage){
 
-  let callerRef =
-    null;
+    errorMessage.textContent =
+      "";
 
+  }
 
-  let callerListenerStarted =
-    false;
+}
 
 
-  let callerUnsubscribe =
-    null;
 
+/*
+=========================================================
+PHONE NORMALIZATION
+=========================================================
+*/
 
-  let currentPhone =
-    null;
+function normalizePhone(phone){
 
+  let value =
+    String(phone || "")
+      .trim()
+      .replace(/[^\d+]/g,"");
 
-  let microphoneMuted =
-    true;
 
+  if(
+    value.startsWith("0") &&
+    value.length >= 10
+  ){
 
-  let webRTCConnected =
-    false;
-
-
-
-  // =====================================================
-  // PHONE NORMALIZATION
-  // =====================================================
-
-
-  function normalizePhone(phone) {
-
-
-    let value =
-
-      String(phone || "")
-
-        .trim()
-
-        .replace(
-          /[^\d+]/g,
-          ""
-        );
-
-
-    if (
-
-      value.startsWith("0") &&
-
-      value.length >= 10
-
-    ) {
-
-      value =
-
-        "+234" +
-
-        value.substring(1);
-
-    }
-
-
-    if (
-
-      value.startsWith("234") &&
-
-      !value.startsWith("+234")
-
-    ) {
-
-      value =
-
-        "+" +
-
-        value;
-
-    }
-
-
-    return value;
+    value =
+      "+234" +
+      value.substring(1);
 
   }
 
 
+  if(
+    value.startsWith("234") &&
+    !value.startsWith("+234")
+  ){
 
-  // =====================================================
-  // CREATE CALLER ID
-  // =====================================================
+    value =
+      "+" +
+      value;
 
-
-  function createCallerId(phone) {
-
-
-    const normalized =
-      normalizePhone(phone);
-
-
-    const digits =
-      normalized.replace(
-        /\D/g,
-        ""
-      );
+  }
 
 
-    return (
-      "caller_" +
-      digits
+  return value;
+
+}
+
+
+
+/*
+=========================================================
+CALLER ID
+=========================================================
+*/
+
+function createCallerId(phone){
+
+  const normalized =
+    normalizePhone(phone);
+
+  const digits =
+    normalized.replace(/\D/g,"");
+
+  return "caller_" + digits;
+
+}
+
+
+
+/*
+=========================================================
+SHOW STATUS
+=========================================================
+*/
+
+function showStatus(
+  icon,
+  title,
+  text
+){
+
+  statusIcon.textContent =
+    icon;
+
+  statusTitle.textContent =
+    title;
+
+  statusText.textContent =
+    text;
+
+  statusBox.classList.remove(
+    "kulzzy-hidden"
+  );
+
+}
+
+
+
+/*
+=========================================================
+MICROPHONE UI
+=========================================================
+*/
+
+function showMicControls(){
+
+  micControls.classList.remove(
+    "kulzzy-hidden"
+  );
+
+  microphoneMuted = true;
+
+  updateMicButton();
+
+}
+
+
+function hideMicControls(){
+
+  micControls.classList.add(
+    "kulzzy-hidden"
+  );
+
+}
+
+
+function updateMicButton(){
+
+  if(!micButton){
+    return;
+  }
+
+
+  if(microphoneMuted){
+
+    micButton.classList.remove(
+      "muted"
     );
 
-  }
+    micButton.textContent =
+      "🎙️ START TALKING";
 
 
-
-  // =====================================================
-  // ERROR
-  // =====================================================
-
-
-  function showError(message) {
-
-
-    if (errorMessage) {
-
-      errorMessage.textContent =
-        message;
-
-    }
+    micStatus.textContent =
+      "Tap the button to start talking on-air.";
 
   }
 
+  else{
 
-
-  function clearError() {
-
-
-    if (errorMessage) {
-
-      errorMessage.textContent =
-        "";
-
-    }
-
-  }
-
-
-
-  // =====================================================
-  // SHOW STATUS
-  // =====================================================
-
-
-  function showStatus(
-
-    icon,
-
-    title,
-
-    text
-
-  ) {
-
-
-    statusIcon.textContent =
-      icon;
-
-
-    statusTitle.textContent =
-      title;
-
-
-    statusText.textContent =
-      text;
-
-
-    statusBox.classList.remove(
-      "hidden"
+    micButton.classList.add(
+      "muted"
     );
 
+    micButton.textContent =
+      "🔇 MUTE MICROPHONE";
+
+
+    micStatus.textContent =
+      "Your microphone is ON. You are talking on-air.";
+
+  }
+
+}
+
+
+
+/*
+=========================================================
+UPDATE CALLER STATUS
+=========================================================
+*/
+
+function updateCallerStatus(caller){
+
+  if(!caller){
+    return;
   }
 
 
+  /*
+  DISCONNECTED
+  */
 
-  // =====================================================
-  // MICROPHONE CONTROL
-  // =====================================================
+  if(
+    caller.status === "disconnected" ||
+    caller.online === false
+  ){
 
+    showStatus(
 
-  function showMicControls() {
+      "❌",
 
+      "Disconnected",
 
-    if (!micControls) {
+      "The host has disconnected you. You can join again when invited."
 
-      return;
-
-    }
-
-
-    micControls.classList.remove(
-      "hidden"
     );
 
+    hideMicControls();
 
-    microphoneMuted =
-      true;
-
-
-    updateMicButton();
+    return;
 
   }
 
 
+  /*
+  HOST ALLOWED
+  */
 
-  function hideMicControls() {
+  if(
+    caller.allowedToSpeak === true
+  ){
 
+    showStatus(
 
-    if (!micControls) {
+      "🎙️",
 
-      return;
+      "YOU ARE LIVE!",
 
-    }
+      "The host has allowed you to speak. Tap the microphone button below to start talking on-air."
 
-
-    micControls.classList.add(
-      "hidden"
     );
 
-  }
+    showMicControls();
 
-
-
-  function updateMicButton() {
-
-
-    if (!micButton) {
-
-      return;
-
-    }
-
-
-    if (microphoneMuted) {
-
-      micButton.classList.remove(
-        "muted"
-      );
-
-
-      micButton.textContent =
-        "🎙️ START TALKING";
-
-
-      if (micStatus) {
-
-        micStatus.textContent =
-          "Tap the button to start talking on-air.";
-
-      }
-
-    }
-
-    else {
-
-      micButton.classList.add(
-        "muted"
-      );
-
-
-      micButton.textContent =
-        "🔇 MUTE MICROPHONE";
-
-
-      if (micStatus) {
-
-        micStatus.textContent =
-          "Your microphone is ON. You are talking on-air.";
-
-      }
-
-    }
+    return;
 
   }
 
 
+  /*
+  WAITING
+  */
 
-  // =====================================================
-  // START / MUTE MICROPHONE
-  // =====================================================
+  showStatus(
+
+    "⏳",
+
+    "You're in the queue",
+
+    "You are connected. Please wait for the host to allow you to speak."
+
+  );
+
+  hideMicControls();
+
+}
 
 
-  async function toggleMicrophone() {
 
+/*
+=========================================================
+CALLER LISTENER
+=========================================================
+*/
 
-    if (!callerUid) {
+function stopCallerListener(){
 
-      showError(
-        "Please join the live community first."
-      );
+  if(callerUnsubscribe){
 
-      return;
+    try{
+
+      callerUnsubscribe();
 
     }
 
-
-    try {
-
-
-      // ================================================
-      // FIRST TIME: CONNECT WEBRTC
-      // ================================================
-
-
-      if (!webRTCConnected) {
-
-
-        if (micButton) {
-
-          micButton.disabled =
-            true;
-
-          micButton.textContent =
-            "🎙️ CONNECTING...";
-
-        }
-
-
-        if (micStatus) {
-
-          micStatus.textContent =
-            "Connecting your microphone to the host...";
-
-        }
-
-
-        await connectCaller(
-          callerUid
-        );
-
-
-        webRTCConnected =
-          true;
-
-
-        microphoneMuted =
-          false;
-
-
-        updateMicButton();
-
-
-        await update(
-
-          callerRef,
-
-          {
-
-            muted:
-              false,
-
-            allowedToSpeak:
-              true,
-
-            status:
-              "speaking",
-
-            online:
-              true
-
-          }
-
-        );
-
-
-        console.log(
-          "🎙️ Caller WebRTC connected."
-        );
-
-
-        return;
-
-      }
-
-
-
-      // ================================================
-      // ALREADY CONNECTED
-      // TOGGLE MICROPHONE
-      // ================================================
-
-
-      microphoneMuted =
-        !microphoneMuted;
-
-
-      muteLocalMicrophone(
-        microphoneMuted
-      );
-
-
-      await update(
-
-        callerRef,
-
-        {
-
-          muted:
-            microphoneMuted,
-
-          allowedToSpeak:
-            !microphoneMuted,
-
-          status:
-            microphoneMuted
-              ? "muted"
-              : "speaking"
-
-        }
-
-      );
-
-
-      updateMicButton();
-
-    }
-
-    catch (error) {
-
+    catch(error){
 
       console.error(
-        "Microphone/WebRTC error:",
+        "Listener stop error:",
         error
       );
 
+    }
 
-      webRTCConnected =
-        false;
+  }
+
+  callerUnsubscribe = null;
+
+  callerListenerStarted = false;
+
+}
 
 
-      microphoneMuted =
-        true;
+function startCallerListener(){
+
+  if(
+    callerListenerStarted ||
+    !callerRef
+  ){
+
+    return;
+
+  }
 
 
-      if (micButton) {
+  callerListenerStarted = true;
 
-        micButton.disabled =
+
+  callerUnsubscribe =
+
+    onValue(
+
+      callerRef,
+
+      (snapshot) => {
+
+        const caller =
+          snapshot.val();
+
+
+        if(caller){
+
+          updateCallerStatus(
+            caller
+          );
+
+        }
+
+      },
+
+      (error) => {
+
+        console.error(
+          "Firebase caller listener error:",
+          error
+        );
+
+        callerListenerStarted =
           false;
 
       }
 
+    );
 
-      updateMicButton();
+}
 
 
-      if (
-        error &&
-        error.name ===
-          "NotAllowedError"
-      ) {
 
-        showError(
-          "Microphone permission was denied. Please allow microphone access in your browser."
-        );
+/*
+=========================================================
+MARK CALLER OFFLINE
+=========================================================
+*/
+
+async function markCurrentCallerOffline(){
+
+  if(!callerRef){
+    return;
+  }
+
+
+  try{
+
+    await update(
+
+      callerRef,
+
+      {
+
+        online:false,
+
+        status:"offline",
+
+        muted:true,
+
+        allowedToSpeak:false,
+
+        lastSeen:Date.now()
 
       }
 
-      else {
+    );
 
-        showError(
-          "Unable to connect your microphone. Please try again."
-        );
+  }
 
-      }
+  catch(error){
+
+    console.error(
+      "Offline update error:",
+      error
+    );
+
+  }
+
+}
 
 
-      if (micStatus) {
 
-        micStatus.textContent =
-          "Microphone connection failed. Please try again.";
+/*
+=========================================================
+REGISTER CALLER
+=========================================================
+*/
 
-      }
+async function registerCaller(){
+
+  clearError();
+
+
+  /*
+  WAIT FOR FIREBASE AUTH
+  */
+
+  if(!currentUser){
+
+    showError(
+      "Connecting to the live system..."
+    );
+
+
+    try{
+
+      await Promise.race([
+
+        firebaseReadyPromise,
+
+        new Promise((_,reject) => {
+
+          setTimeout(
+
+            () => reject(
+              new Error(
+                "Firebase authentication timeout"
+              )
+            ),
+
+            10000
+
+          );
+
+        })
+
+      ]);
 
     }
 
-    finally {
+    catch(error){
 
+      console.error(
+        "Firebase ready error:",
+        error
+      );
 
-      if (micButton) {
+      showError(
+        "Unable to connect to the live system. Please refresh the page and try again."
+      );
 
-        micButton.disabled =
-          false;
-
-      }
+      return;
 
     }
 
   }
 
 
+  if(!currentUser){
 
-  // =====================================================
-  // UPDATE STATUS FROM FIREBASE
-  // =====================================================
+    showError(
+      "Unable to connect to the live system. Please refresh the page and try again."
+    );
 
+    return;
 
-  function updateCallerStatus(
-    caller
-  ) {
-
-
-    if (!caller) {
-
-      return;
-
-    }
+  }
 
 
-    // ================================================
-    // DISCONNECTED
-    // ================================================
+  /*
+  PHONE
+  */
+
+  const phone =
+    normalizePhone(
+      phoneInput.value
+    );
 
 
-    if (
+  if(!phone){
 
-      caller.status ===
-        "disconnected" ||
+    showError(
+      "Please enter your phone number."
+    );
 
-      caller.online === false
+    return;
 
-    ) {
+  }
 
 
-      showStatus(
+  if(phone.length < 10){
 
-        "❌",
+    showError(
+      "Please enter a valid phone number."
+    );
 
-        "Disconnected",
+    return;
 
-        "The host has disconnected you. You can join again when invited."
+  }
 
+
+  /*
+  CREATE CALLER
+  */
+
+  const newCallerUid =
+    createCallerId(phone);
+
+
+  /*
+  IF NUMBER CHANGED
+  */
+
+  if(
+    callerRef &&
+    callerUid &&
+    callerUid !== newCallerUid
+  ){
+
+    await markCurrentCallerOffline();
+
+    stopCallerListener();
+
+  }
+
+
+  callerUid =
+    newCallerUid;
+
+
+  currentPhone =
+    phone;
+
+
+  callerRef =
+    ref(
+      db,
+      "callers/" +
+      callerUid
+    );
+
+
+  /*
+  BUTTON
+  */
+
+  joinButton.disabled =
+    true;
+
+  joinButton.textContent =
+    "CONNECTING...";
+
+
+  try{
+
+    const now =
+      Date.now();
+
+
+    /*
+    SAVE CALLER
+    */
+
+    await update(
+
+      callerRef,
+
+      {
+
+        phone:phone,
+
+        status:"waiting",
+
+        muted:true,
+
+        allowedToSpeak:false,
+
+        online:true,
+
+        lastSeen:now,
+
+        joinedAt:now
+
+      }
+
+    );
+
+
+    /*
+    AUTO OFFLINE
+    */
+
+    const disconnect =
+      onDisconnect(
+        callerRef
       );
 
 
-      hideMicControls();
+    await disconnect.update({
+
+      online:false,
+
+      status:"offline",
+
+      muted:true,
+
+      allowedToSpeak:false,
+
+      lastSeen:Date.now()
+
+    });
 
 
-      return;
+    /*
+    SAVE PHONE
+    */
 
-    }
+    try{
 
-
-
-    // ================================================
-    // HOST ALLOWED CALLER
-    // ================================================
-
-
-    if (
-
-      caller.allowedToSpeak ===
-        true
-
-    ) {
-
-
-      showStatus(
-
-        "🎙️",
-
-        "YOU ARE LIVE!",
-
-        "The host has allowed you to speak. Tap the microphone button below to start talking on-air."
-
+      localStorage.setItem(
+        "kulzzy_live_phone",
+        phone
       );
 
-
-      showMicControls();
-
-
-      return;
-
-    }
-
-
-
-    // ================================================
-    // MUTED / WAITING
-    // ================================================
-
-
-    if (
-
-      caller.muted ===
-        true
-
-    ) {
-
-
-      showStatus(
-
-        "⏳",
-
-        "You're in the queue",
-
-        "You are connected. Please wait for the host to allow you to speak."
-
+      localStorage.setItem(
+        "kulzzy_live_caller_uid",
+        callerUid
       );
 
+    }
 
-      hideMicControls();
+    catch(storageError){
 
-
-      return;
+      console.log(
+        "Local storage unavailable:",
+        storageError
+      );
 
     }
 
 
+    /*
+    SHOW PHONE
+    */
 
-    // ================================================
-    // DEFAULT
-    // ================================================
+    phoneInput.value =
+      phone;
 
+
+    /*
+    HIDE JOIN AREA
+    */
+
+    joinArea.classList.add(
+      "kulzzy-hidden"
+    );
+
+
+    /*
+    SHOW WAITING
+    */
 
     showStatus(
 
@@ -1442,542 +1238,392 @@
 
     hideMicControls();
 
+
+    /*
+    LISTEN FOR HOST
+    */
+
+    startCallerListener();
+
+
+    console.log(
+      "===================================="
+    );
+
+    console.log(
+      "KULZZY CALLER REGISTERED"
+    );
+
+    console.log(
+      "Phone:",
+      phone
+    );
+
+    console.log(
+      "Caller ID:",
+      callerUid
+    );
+
+    console.log(
+      "Firebase path:",
+      "callers/" + callerUid
+    );
+
+    console.log(
+      "===================================="
+    );
+
   }
 
+  catch(error){
+
+    console.error(
+      "CALLER REGISTRATION ERROR:",
+      error
+    );
 
 
-  // =====================================================
-  // STOP CALLER LISTENER
-  // =====================================================
+    joinButton.disabled =
+      false;
+
+    joinButton.textContent =
+      "🎙️ JOIN LIVE";
 
 
-  function stopCallerListener() {
+    /*
+    SHOW REALISTIC ERROR
+    */
+
+    let message =
+      "Unable to connect to the live system. Please try again.";
 
 
-    if (callerUnsubscribe) {
+    if(
+      error &&
+      (
+        error.code ===
+        "PERMISSION_DENIED" ||
+        String(error.message || "")
+          .toLowerCase()
+          .includes("permission")
+      )
+    ){
 
-      try {
-
-        callerUnsubscribe();
-
-      }
-
-      catch (error) {
-
-        console.error(
-          "Unable to stop caller listener:",
-          error
-        );
-
-      }
+      message =
+        "Firebase permission denied. Please check your Firebase Realtime Database rules.";
 
     }
 
 
-    callerUnsubscribe =
-      null;
+    showError(message);
+
+  }
+
+}
 
 
-    callerListenerStarted =
+
+/*
+=========================================================
+MICROPHONE
+=========================================================
+*/
+
+async function toggleMicrophone(){
+
+  clearError();
+
+
+  if(!callerUid){
+
+    showError(
+      "Please join the live community first."
+    );
+
+    return;
+
+  }
+
+
+  try{
+
+    /*
+    FIRST CONNECTION
+    */
+
+    if(!webRTCConnected){
+
+      micButton.disabled =
+        true;
+
+      micButton.textContent =
+        "🎙️ CONNECTING...";
+
+
+      micStatus.textContent =
+        "Connecting your microphone to the host...";
+
+
+      await connectCaller(
+        callerUid
+      );
+
+
+      webRTCConnected =
+        true;
+
+
+      microphoneMuted =
+        false;
+
+
+      updateMicButton();
+
+
+      await update(
+
+        callerRef,
+
+        {
+
+          muted:false,
+
+          allowedToSpeak:true,
+
+          status:"speaking",
+
+          online:true
+
+        }
+
+      );
+
+
+      console.log(
+        "Caller WebRTC connected."
+      );
+
+
+      return;
+
+    }
+
+
+    /*
+    TOGGLE MUTE
+    */
+
+    microphoneMuted =
+      !microphoneMuted;
+
+
+    muteLocalMicrophone(
+      microphoneMuted
+    );
+
+
+    await update(
+
+      callerRef,
+
+      {
+
+        muted:
+          microphoneMuted,
+
+        allowedToSpeak:
+          !microphoneMuted,
+
+        status:
+          microphoneMuted
+            ? "muted"
+            : "speaking"
+
+      }
+
+    );
+
+
+    updateMicButton();
+
+  }
+
+  catch(error){
+
+    console.error(
+      "MICROPHONE / WEBRTC ERROR:",
+      error
+    );
+
+
+    webRTCConnected =
+      false;
+
+    microphoneMuted =
+      true;
+
+
+    micButton.disabled =
+      false;
+
+
+    updateMicButton();
+
+
+    if(
+      error &&
+      error.name ===
+      "NotAllowedError"
+    ){
+
+      showError(
+        "Microphone permission was denied. Please allow microphone access and try again."
+      );
+
+    }
+
+    else if(
+      error &&
+      error.name ===
+      "NotFoundError"
+    ){
+
+      showError(
+        "No microphone was found on this device."
+      );
+
+    }
+
+    else{
+
+      showError(
+        "Unable to connect your microphone. Please try again."
+      );
+
+    }
+
+
+    micStatus.textContent =
+      "Microphone connection failed. Please try again.";
+
+  }
+
+  finally{
+
+    micButton.disabled =
       false;
 
   }
 
+}
 
 
-  // =====================================================
-  // WATCH CALLER
-  // =====================================================
 
+/*
+=========================================================
+JOIN BUTTON
+=========================================================
+*/
 
-  function startCallerListener() {
+joinButton.addEventListener(
 
+  "click",
 
-    if (
+  function(){
 
-      callerListenerStarted ||
-
-      !callerRef
-
-    ) {
-
-      return;
-
-    }
-
-
-    callerListenerStarted =
-      true;
-
-
-    callerUnsubscribe =
-
-      onValue(
-
-        callerRef,
-
-        function(snapshot) {
-
-
-          const caller =
-            snapshot.val();
-
-
-          if (caller) {
-
-            updateCallerStatus(
-              caller
-            );
-
-          }
-
-        },
-
-        function(error) {
-
-
-          console.error(
-            "Caller listener error:",
-            error
-          );
-
-
-          callerListenerStarted =
-            false;
-
-        }
-
-      );
+    registerCaller();
 
   }
 
+);
 
 
-  // =====================================================
-  // MARK CURRENT CALLER OFFLINE
-  // =====================================================
 
+/*
+=========================================================
+ENTER KEY
+=========================================================
+*/
 
-  async function markCurrentCallerOffline() {
+phoneInput.addEventListener(
 
+  "keydown",
 
-    if (!callerRef) {
+  function(event){
 
-      return;
+    if(event.key === "Enter"){
 
-    }
+      event.preventDefault();
 
-
-    try {
-
-
-      await update(
-
-        callerRef,
-
-        {
-
-          online:
-            false,
-
-          status:
-            "offline",
-
-          muted:
-            true,
-
-          allowedToSpeak:
-            false,
-
-          lastSeen:
-            Date.now()
-
-        }
-
-      );
-
-
-    }
-
-    catch (error) {
-
-      console.error(
-        "Unable to mark caller offline:",
-        error
-      );
+      registerCaller();
 
     }
 
   }
 
+);
 
 
-  // =====================================================
-  // REGISTER CALLER
-  // =====================================================
 
+/*
+=========================================================
+MIC BUTTON
+=========================================================
+*/
 
-  async function registerCaller() {
+micButton.addEventListener(
 
+  "click",
 
-    if (!currentUser) {
+  function(){
 
-
-      showError(
-        "Connecting to the live system. Please wait a moment and try again."
-      );
-
-
-      return;
-
-    }
-
-
-    const phone =
-
-      normalizePhone(
-        phoneInput.value
-      );
-
-
-    if (!phone) {
-
-      showError(
-        "Please enter your phone number."
-      );
-
-
-      return;
-
-    }
-
-
-    if (phone.length < 10) {
-
-      showError(
-        "Please enter a valid phone number."
-      );
-
-
-      return;
-
-    }
-
-
-    clearError();
-
-
-    const newCallerUid =
-      createCallerId(phone);
-
-
-
-    // ================================================
-    // IF CHANGING NUMBER
-    // ================================================
-
-
-    if (
-
-      callerRef &&
-
-      callerUid &&
-
-      callerUid !== newCallerUid
-
-    ) {
-
-
-      await markCurrentCallerOffline();
-
-
-      stopCallerListener();
-
-
-    }
-
-
-    callerUid =
-      newCallerUid;
-
-
-    currentPhone =
-      phone;
-
-
-    callerRef =
-
-      ref(
-
-        db,
-
-        "callers/" +
-        callerUid
-
-      );
-
-
-
-    // ================================================
-    // SAVE LOCALLY
-    // ================================================
-
-    localStorage.setItem(
-      "kulzzy_live_phone",
-      phone
-    );
-
-    localStorage.setItem(
-      "kulzzy_live_caller_uid",
-      callerUid
-    );
-
-
-    // ================================================
-    // BUTTON
-    // ================================================
-
-    joinButton.disabled =
-      true;
-
-    joinButton.textContent =
-      "CONNECTING...";
-
-
-    try {
-
-      // ==============================================
-      // REGISTER CALLER
-      // ==============================================
-
-      await update(
-        callerRef,
-        {
-
-          phone:
-            phone,
-
-          status:
-            "waiting",
-
-          muted:
-            true,
-
-          allowedToSpeak:
-            false,
-
-          online:
-            true,
-
-          lastSeen:
-            Date.now(),
-
-          joinedAt:
-            Date.now()
-
-        }
-      );
-
-
-      // ==============================================
-      // KEEP CALLER ONLINE WHILE CONNECTED
-      // ==============================================
-
-      await onDisconnect(
-        callerRef
-      ).update({
-
-        online:
-          false,
-
-        status:
-          "offline",
-
-        muted:
-          true,
-
-        allowedToSpeak:
-          false,
-
-        lastSeen:
-          Date.now()
-
-      });
-
-
-      // ==============================================
-      // UPDATE PHONE FIELD
-      // ==============================================
-
-      phoneInput.value =
-        phone;
-
-
-      // ==============================================
-      // HIDE JOIN FORM
-      // ==============================================
-
-      joinArea.classList.add(
-        "hidden"
-      );
-
-
-      // ==============================================
-      // SHOW WAITING STATUS
-      // ==============================================
-
-      showStatus(
-
-        "⏳",
-
-        "You're in the queue",
-
-        "You are connected. Please wait for the host to allow you to speak."
-
-      );
-
-
-      hideMicControls();
-
-
-      // ==============================================
-      // START FIREBASE LISTENER
-      // ==============================================
-
-      startCallerListener();
-
-
-      console.log(
-        "===================================="
-      );
-
-      console.log(
-        "🎙️ KULZZY CALLER REGISTERED"
-      );
-
-      console.log(
-        "Phone:",
-        phone
-      );
-
-      console.log(
-        "Caller ID:",
-        callerUid
-      );
-
-      console.log(
-        "Firebase path:",
-        "callers/" + callerUid
-      );
-
-      console.log(
-        "===================================="
-      );
-
-    }
-
-    catch (error) {
-
-      console.error(
-        "Caller registration error:",
-        error
-      );
-
-
-      showError(
-        "Unable to connect to the live system. Please try again."
-      );
-
-
-      joinButton.disabled =
-        false;
-
-      joinButton.textContent =
-        "🎙️ JOIN LIVE";
-
-    }
+    toggleMicrophone();
 
   }
 
-
-
-  // =====================================================
-  // JOIN BUTTON
-  // =====================================================
-
-  joinButton.addEventListener(
-    "click",
-    registerCaller
-  );
+);
 
 
 
-  // =====================================================
-  // ENTER KEY
-  // =====================================================
+/*
+=========================================================
+FIREBASE AUTHENTICATION
+=========================================================
+*/
 
-  phoneInput.addEventListener(
-    "keydown",
-    function(event) {
+onAuthStateChanged(
 
-      if (
-        event.key ===
-        "Enter"
-      ) {
+  auth,
 
-        event.preventDefault();
+  async function(user){
 
-        registerCaller();
+    /*
+    USER AUTHENTICATED
+    */
 
-      }
+    if(user){
 
-    }
-  );
+      currentUser =
+        user;
 
-
-
-  // =====================================================
-  // MICROPHONE BUTTON
-  // =====================================================
-
-  if (micButton) {
-
-    micButton.addEventListener(
-      "click",
-      toggleMicrophone
-    );
-
-  }
+      firebaseReady =
+        true;
 
 
-
-  // =====================================================
-  // FIREBASE AUTHENTICATION
-  // =====================================================
-
-  onAuthStateChanged(
-    auth,
-    async function(user) {
-
-      // ================================================
-      // USER ALREADY EXISTS
-      // ================================================
-
-      if (user) {
-
-        currentUser =
-          user;
+      console.log(
+        "Firebase authentication ready:",
+        user.uid
+      );
 
 
-        console.log(
-          "Firebase anonymous authentication ready:",
-          user.uid
-        );
+      resolveFirebaseReady();
 
 
-        // ==============================================
-        // LOAD SAVED PHONE
-        // ==============================================
+      /*
+      LOAD SAVED PHONE
+      */
+
+      try{
 
         const savedPhone =
           localStorage.getItem(
@@ -1985,158 +1631,183 @@
           );
 
 
-        if (
+        if(
           savedPhone &&
           !currentPhone
-        ) {
+        ){
 
           phoneInput.value =
             savedPhone;
 
         }
 
-
-        // ==============================================
-        // SAVED CALLER ID
-        // ==============================================
-
-        const savedCallerUid =
-          localStorage.getItem(
-            "kulzzy_live_caller_uid"
-          );
-
-
-        if (savedCallerUid) {
-
-          console.log(
-            "Previous caller ID found:",
-            savedCallerUid
-          );
-
-        }
-
-
-        console.log(
-          "🎙️ Live Community is ready."
-        );
-
-
-        return;
-
       }
 
-
-      // ================================================
-      // NO USER YET
-      // ================================================
-
-      console.log(
-        "No Firebase anonymous user found."
-      );
-
-
-      // ================================================
-      // SIGN IN ANONYMOUSLY
-      // ================================================
-
-      try {
+      catch(error){
 
         console.log(
-          "🔐 Starting Firebase anonymous authentication..."
-        );
-
-
-        await signInAnonymously(
-          auth
-        );
-
-
-        console.log(
-          "✅ Firebase anonymous authentication started."
-        );
-
-      }
-
-      catch (error) {
-
-        console.error(
-          "❌ Firebase anonymous authentication error:",
+          "Unable to load saved phone:",
           error
         );
 
+      }
 
-        showError(
-          "Unable to connect to the live system. Please refresh the page and try again."
+
+      console.log(
+        "Kulzzy Live Community is ready."
+      );
+
+
+      return;
+
+    }
+
+
+    /*
+    NO USER
+    */
+
+    currentUser =
+      null;
+
+    firebaseReady =
+      false;
+
+
+    console.log(
+      "No Firebase anonymous user."
+    );
+
+
+    /*
+    SIGN IN ANONYMOUSLY
+    */
+
+    try{
+
+      await signInAnonymously(
+        auth
+      );
+
+
+      console.log(
+        "Firebase anonymous authentication started."
+      );
+
+    }
+
+    catch(error){
+
+      console.error(
+        "Firebase anonymous authentication error:",
+        error
+      );
+
+
+      showError(
+        "Unable to connect to the live system. Please refresh the page and try again."
+      );
+
+    }
+
+  }
+
+);
+
+
+
+/*
+=========================================================
+PAGE CLEANUP
+=========================================================
+*/
+
+window.addEventListener(
+
+  "beforeunload",
+
+  function(){
+
+    try{
+
+      if(callerRef){
+
+        update(
+
+          callerRef,
+
+          {
+
+            online:false,
+
+            status:"offline",
+
+            muted:true,
+
+            allowedToSpeak:false,
+
+            lastSeen:Date.now()
+
+          }
+
+        );
+
+      }
+
+      if(webRTCConnected){
+
+        closeWebRTC(
+          callerUid
         );
 
       }
 
     }
-  );
 
-
-
-  // =====================================================
-  // PAGE CLEANUP
-  // =====================================================
-
-  window.addEventListener(
-    "beforeunload",
-    function() {
-
-      /*
-       * We intentionally DO NOT DELETE
-       * the caller record.
-       *
-       * The caller's phone number remains
-       * available in the admin panel.
-       */
+    catch(error){
 
       console.log(
-        "🎙️ Leaving Kulzzy Radio Live Community."
+        "Cleanup error:",
+        error
       );
 
     }
-  );
+
+  }
+
+);
 
 
 
-  // =====================================================
-  // INITIAL MESSAGE
-  // =====================================================
+/*
+=========================================================
+STARTUP
+=========================================================
+*/
 
-  console.log(
-    "=========================================="
-  );
+console.log(
+  "===================================="
+);
 
-  console.log(
-    "🎙️ KULZZY RADIO NETWORK"
-  );
+console.log(
+  "KULZZY RADIO NETWORK"
+);
 
-  console.log(
-    "LIVE COMMUNITY"
-  );
+console.log(
+  "LIVE COMMUNITY"
+);
 
-  console.log(
-    "Public Live Community loaded."
-  );
+console.log(
+  "GITHUB VERSION"
+);
 
-  console.log(
-    "Phone-based caller IDs enabled."
-  );
+console.log(
+  "Firebase + WebRTC enabled"
+);
 
-  console.log(
-    "Caller records are NOT deleted."
-  );
-
-  console.log(
-    "WebRTC microphone controls enabled."
-  );
-
-  console.log(
-    "=========================================="
-  );
-
+console.log(
+  "===================================="
+);
 
 </script>
 
