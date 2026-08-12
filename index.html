@@ -891,29 +891,27 @@
     // ================================================
 
 
-    if (
+if (
+  caller.allowedToSpeak === true &&
+  caller.muted === false
+) {
 
-      caller.allowedToSpeak === true &&
+  showStatus(
+    "🎙️",
+    "YOU ARE LIVE!",
+    "The host has allowed you to speak. Tap the microphone button below to start talking on-air."
+  );
 
-      caller.muted === false
+  // Show the microphone controls
+  const micButton =
+    document.getElementById("micButton");
 
-    ) {
+  if (micButton) {
+    micButton.classList.remove("hidden");
+  }
 
-
-      showStatus(
-
-        "🎙️",
-
-        "You are allowed to speak",
-
-        "The host has allowed your microphone. Follow the microphone instructions to speak on-air."
-
-      );
-
-
-      return;
-
-    }
+  return;
+}
 
 
 
