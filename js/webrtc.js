@@ -1,27 +1,39 @@
 // ======================================================
 // KULZZY RADIO LIVE COMMUNITY
 // WEBRTC ENGINE
-// VERSION 4.0
+// VERSION 5.0
 //
-// IMPORTANT:
+// IMPORTANT
+//
 // This file works with:
-//   - public/index.html
-//   - public/admin.html
-//   - js/admin.js
-//   - js/firebase.js
 //
-// DO NOT CHANGE THE Firebase paths.
+//   public/index.html
+//   public/admin.html
+//   js/admin.js
+//   js/firebase.js
+//
+// Firebase paths remain:
+//
+//   webrtc/{callerId}/offer
+//   webrtc/{callerId}/answer
+//   webrtc/{callerId}/callerCandidates
+//   webrtc/{callerId}/hostCandidates
+//
 // ======================================================
 
+
 import { db } from "./firebase.js";
+
 
 import {
   ref,
   set,
+  get,
   onValue,
   onChildAdded,
   remove
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
 
 
 // ======================================================
@@ -33,12 +45,28 @@ const ICE_SERVERS = {
   iceServers: [
 
     {
-      urls: [
-        "stun:stun.l.google.com:19302",
-        "stun:stun1.l.google.com:19302",
-        "stun:stun2.l.google.com:19302",
+      urls:
+        "stun:stun.l.google.com:19302"
+    },
+
+    {
+      urls:
+        "stun:stun1.l.google.com:19302"
+    },
+
+    {
+      urls:
+        "stun:stun2.l.google.com:19302"
+    },
+
+    {
+      urls:
         "stun:stun3.l.google.com:19302"
-      ]
+    },
+
+    {
+      urls:
+        "stun:stun4.l.google.com:19302"
     }
 
   ],
@@ -48,27 +76,60 @@ const ICE_SERVERS = {
 };
 
 
+
 // ======================================================
 // GLOBAL VARIABLES
 // ======================================================
 
-let peerConnection = null;
+let peerConnection =
+  null;
 
-let localStream = null;
 
-let currentCallerId = null;
+let localStream =
+  null;
 
-let answerListener = null;
 
-let hostCandidateListener = null;
+let currentCallerId =
+  null;
 
-let callerCandidateListener = null;
 
-let connectionTimeout = null;
+let answerListener =
+  null;
+
+
+let hostCandidateListener =
+  null;
+
+
+let callerCandidateListener =
+  null;
+
+
+let connectionTimeout =
+  null;
+
 
 
 // ======================================================
-// LOG HELPER
+// REMOTE DESCRIPTION READY
+// ======================================================
+
+let remoteDescriptionReady =
+  false;
+
+
+
+// ======================================================
+// WAITING ICE CANDIDATES
+// ======================================================
+
+let pendingRemoteCandidates =
+  [];
+
+
+
+// ======================================================
+// LOG
 // ======================================================
 
 function log(...args) {
@@ -81,11 +142,15 @@ function log(...args) {
 }
 
 
+
 // ======================================================
-// ERROR HELPER
+// ERROR LOG
 // ======================================================
 
-function webRTCError(message, error = null) {
+function webRTCError(
+  message,
+  error = null
+) {
 
   console.error(
     "❌ [KULZZY WEBRTC]",
@@ -94,6 +159,30 @@ function webRTCError(message, error = null) {
   );
 
 }
+
+
+
+// ======================================================
+// CLEAR TIMEOUT
+// ======================================================
+
+function clearConnectionTimeout() {
+
+  if (
+    connectionTimeout
+  ) {
+
+    clearTimeout(
+      connectionTimeout
+    );
+
+    connectionTimeout =
+      null;
+
+  }
+
+}
+
 
 
 // ======================================================
@@ -119,24 +208,48 @@ function waitForIceGatheringComplete(
       }
 
 
-      const checkState =
-        function() {
+      let finished =
+        false;
 
-          if (
-            pc.iceGatheringState ===
-            "complete"
-          ) {
 
-            pc.removeEventListener(
-              "icegatheringstatechange",
-              checkState
-            );
+      function finish() {
 
-            resolve();
+        if (
+          finished
+        ) {
 
-          }
+          return;
 
-        };
+        }
+
+
+        finished =
+          true;
+
+
+        pc.removeEventListener(
+          "icegatheringstatechange",
+          checkState
+        );
+
+
+        resolve();
+
+      }
+
+
+      function checkState() {
+
+        if (
+          pc.iceGatheringState ===
+          "complete"
+        ) {
+
+          finish();
+
+        }
+
+      }
 
 
       pc.addEventListener(
@@ -145,19 +258,9 @@ function waitForIceGatheringComplete(
       );
 
 
-      // Safety timeout.
       setTimeout(
-        function() {
-
-          pc.removeEventListener(
-            "icegatheringstatechange",
-            checkState
-          );
-
-          resolve();
-
-        },
-        8000
+        finish,
+        10000
       );
 
     }
@@ -166,24 +269,162 @@ function waitForIceGatheringComplete(
 }
 
 
+
 // ======================================================
-// CLEAR TIMEOUT
+// ADD REMOTE ICE CANDIDATE
 // ======================================================
 
-function clearConnectionTimeout() {
+async function addRemoteCandidate(
+  candidate
+) {
 
-  if (connectionTimeout) {
+  if (
+    !candidate
+  ) {
 
-    clearTimeout(
-      connectionTimeout
+    return;
+
+  }
+
+
+  if (
+    !peerConnection
+  ) {
+
+    pendingRemoteCandidates.push(
+      candidate
     );
 
-    connectionTimeout =
-      null;
+    return;
+
+  }
+
+
+  if (
+    !remoteDescriptionReady
+  ) {
+
+    pendingRemoteCandidates.push(
+      candidate
+    );
+
+
+    log(
+      "ICE candidate queued until remote description is ready."
+    );
+
+
+    return;
+
+  }
+
+
+  try {
+
+    await peerConnection.addIceCandidate(
+
+      new RTCIceCandidate(
+        candidate
+      )
+
+    );
+
+
+    log(
+      "✅ Remote ICE candidate added."
+    );
+
+  }
+
+  catch (error) {
+
+    webRTCError(
+      "Unable to add remote ICE candidate.",
+      error
+    );
 
   }
 
 }
+
+
+
+// ======================================================
+// FLUSH QUEUED ICE CANDIDATES
+// ======================================================
+
+async function flushPendingCandidates() {
+
+  if (
+    !peerConnection ||
+    !remoteDescriptionReady
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    pendingRemoteCandidates.length ===
+    0
+  ) {
+
+    return;
+
+  }
+
+
+  const candidates =
+    [
+      ...pendingRemoteCandidates
+    ];
+
+
+  pendingRemoteCandidates =
+    [];
+
+
+  log(
+    "Adding queued ICE candidates:",
+    candidates.length
+  );
+
+
+  for (
+    const candidate of candidates
+  ) {
+
+    try {
+
+      await peerConnection.addIceCandidate(
+
+        new RTCIceCandidate(
+          candidate
+        )
+
+      );
+
+
+      log(
+        "✅ Queued ICE candidate added."
+      );
+
+    }
+
+    catch (error) {
+
+      webRTCError(
+        "Unable to add queued ICE candidate.",
+        error
+      );
+
+    }
+
+  }
+
+}
+
 
 
 // ======================================================
@@ -208,6 +449,7 @@ function createConnection(
     );
 
 
+
   // ====================================================
   // CONNECTION STATE
   // ====================================================
@@ -228,8 +470,19 @@ function createConnection(
 
         clearConnectionTimeout();
 
+
+        log(
+          "======================================"
+        );
+
+
         log(
           "✅ WEBRTC CONNECTION ESTABLISHED"
+        );
+
+
+        log(
+          "======================================"
         );
 
       }
@@ -237,21 +490,29 @@ function createConnection(
 
       if (
         pc.connectionState ===
-          "failed" ||
-        pc.connectionState ===
-          "disconnected" ||
-        pc.connectionState ===
-          "closed"
+        "failed"
       ) {
 
         webRTCError(
-          "WebRTC connection state:",
-          pc.connectionState
+          "WebRTC connection FAILED."
+        );
+
+      }
+
+
+      if (
+        pc.connectionState ===
+        "disconnected"
+      ) {
+
+        log(
+          "⚠️ WebRTC temporarily disconnected."
         );
 
       }
 
     };
+
 
 
   // ====================================================
@@ -266,26 +527,40 @@ function createConnection(
         pc.iceConnectionState
       );
 
+
+      if (
+        pc.iceConnectionState ===
+        "failed"
+      ) {
+
+        webRTCError(
+          "ICE connection failed."
+        );
+
+      }
+
     };
 
 
+
   // ====================================================
-  // ICE GATHERING STATE
+  // ICE GATHERING
   // ====================================================
 
   pc.onicegatheringstatechange =
     function() {
 
       log(
-        "ICE gathering state:",
+        "ICE gathering:",
         pc.iceGatheringState
       );
 
     };
 
 
+
   // ====================================================
-  // SIGNALING STATE
+  // SIGNALING
   // ====================================================
 
   pc.onsignalingstatechange =
@@ -299,8 +574,9 @@ function createConnection(
     };
 
 
+
   // ====================================================
-  // ICE CANDIDATES
+  // LOCAL ICE CANDIDATE
   // ====================================================
 
   pc.onicecandidate =
@@ -317,11 +593,16 @@ function createConnection(
 
       const path =
 
-        role === "caller"
+        role ===
+        "caller"
 
-          ? `webrtc/${callerId}/callerCandidates`
+          ?
 
-          : `webrtc/${callerId}/hostCandidates`;
+        `webrtc/${callerId}/callerCandidates`
+
+          :
+
+        `webrtc/${callerId}/hostCandidates`;
 
 
       const candidateId =
@@ -350,7 +631,7 @@ function createConnection(
 
 
         log(
-          "ICE candidate saved:",
+          "📡 ICE candidate saved:",
           role
         );
 
@@ -368,15 +649,16 @@ function createConnection(
     };
 
 
+
   // ====================================================
-  // RECEIVE REMOTE AUDIO ON HOST
+  // REMOTE AUDIO
   // ====================================================
 
   pc.ontrack =
     function(event) {
 
       log(
-        "🔊 Remote caller audio received."
+        "🔊 Remote audio received."
       );
 
 
@@ -386,7 +668,9 @@ function createConnection(
         );
 
 
-      if (!audio) {
+      if (
+        !audio
+      ) {
 
         audio =
           document.createElement(
@@ -435,7 +719,7 @@ function createConnection(
             function(error) {
 
               log(
-                "Browser waiting for audio permission:",
+                "Browser did not automatically play remote audio:",
                 error
               );
 
@@ -452,27 +736,38 @@ function createConnection(
 }
 
 
+
 // ======================================================
 // GET MICROPHONE
 // ======================================================
 
 async function getMicrophone() {
 
+  log(
+    "🎙️ Requesting microphone permission..."
+  );
+
+
   if (
-    !navigator.mediaDevices ||
-    !navigator.mediaDevices.getUserMedia
+    !navigator.mediaDevices
   ) {
 
     throw new Error(
-      "Microphone access is not supported by this browser."
+      "Browser does not provide mediaDevices."
     );
 
   }
 
 
-  log(
-    "Requesting microphone permission..."
-  );
+  if (
+    !navigator.mediaDevices.getUserMedia
+  ) {
+
+    throw new Error(
+      "Browser does not support microphone access."
+    );
+
+  }
 
 
   try {
@@ -491,7 +786,10 @@ async function getMicrophone() {
               true,
 
             autoGainControl:
-              true
+              true,
+
+            channelCount:
+              1
 
           },
 
@@ -502,7 +800,7 @@ async function getMicrophone() {
 
 
     log(
-      "✅ Microphone permission granted."
+      "✅ MICROPHONE ACCESS GRANTED"
     );
 
 
@@ -525,8 +823,9 @@ async function getMicrophone() {
 }
 
 
+
 // ======================================================
-// CALLER CONNECT
+// CALLER
 // ======================================================
 
 export async function connectCaller(
@@ -537,21 +836,26 @@ export async function connectCaller(
     "======================================"
   );
 
+
   log(
-    "CALLER CONNECTION STARTING"
+    "🎙️ CALLER CONNECTION STARTING"
   );
+
 
   log(
     "Caller ID:",
     callerId
   );
 
+
   log(
     "======================================"
   );
 
 
-  if (!callerId) {
+  if (
+    !callerId
+  ) {
 
     throw new Error(
       "Caller ID is missing."
@@ -564,11 +868,22 @@ export async function connectCaller(
     callerId;
 
 
+  remoteDescriptionReady =
+    false;
+
+
+  pendingRemoteCandidates =
+    [];
+
+
+
   // ====================================================
   // CLOSE OLD CONNECTION
   // ====================================================
 
-  if (peerConnection) {
+  if (
+    peerConnection
+  ) {
 
     try {
 
@@ -579,11 +894,12 @@ export async function connectCaller(
     catch (error) {
 
       console.warn(
-        "Old WebRTC connection could not close:",
+        "Unable to close previous connection:",
         error
       );
 
     }
+
 
     peerConnection =
       null;
@@ -591,7 +907,14 @@ export async function connectCaller(
   }
 
 
-  if (localStream) {
+
+  // ====================================================
+  // STOP OLD MICROPHONE
+  // ====================================================
+
+  if (
+    localStream
+  ) {
 
     localStream
       .getTracks()
@@ -613,6 +936,7 @@ export async function connectCaller(
   clearConnectionTimeout();
 
 
+
   // ====================================================
   // GET MICROPHONE
   // ====================================================
@@ -621,8 +945,9 @@ export async function connectCaller(
     await getMicrophone();
 
 
+
   // ====================================================
-  // CREATE PEER CONNECTION
+  // CREATE CONNECTION
   // ====================================================
 
   peerConnection =
@@ -632,8 +957,9 @@ export async function connectCaller(
     );
 
 
+
   // ====================================================
-  // ADD MICROPHONE TRACKS
+  // ADD AUDIO
   // ====================================================
 
   localStream
@@ -651,8 +977,9 @@ export async function connectCaller(
 
 
   log(
-    "Microphone tracks added."
+    "🎙️ Microphone track added."
   );
+
 
 
   // ====================================================
@@ -660,15 +987,7 @@ export async function connectCaller(
   // ====================================================
 
   const offer =
-    await peerConnection.createOffer({
-
-      offerToReceiveAudio:
-        false,
-
-      offerToReceiveVideo:
-        false
-
-    });
+    await peerConnection.createOffer();
 
 
   await peerConnection.setLocalDescription(
@@ -677,8 +996,9 @@ export async function connectCaller(
 
 
   log(
-    "Caller offer created."
+    "📡 Caller offer created."
   );
+
 
 
   // ====================================================
@@ -690,17 +1010,20 @@ export async function connectCaller(
   );
 
 
-  const localDescription =
+  const description =
     peerConnection.localDescription;
 
 
-  if (!localDescription) {
+  if (
+    !description
+  ) {
 
     throw new Error(
-      "Unable to create WebRTC local description."
+      "Caller local description was not created."
     );
 
   }
+
 
 
   // ====================================================
@@ -717,10 +1040,10 @@ export async function connectCaller(
     {
 
       type:
-        localDescription.type,
+        description.type,
 
       sdp:
-        localDescription.sdp
+        description.sdp
 
     }
 
@@ -728,12 +1051,13 @@ export async function connectCaller(
 
 
   log(
-    "✅ Caller offer sent to Firebase."
+    "✅ CALLER OFFER SENT TO FIREBASE"
   );
 
 
+
   // ====================================================
-  // WAIT FOR HOST ANSWER
+  // LISTEN FOR HOST ANSWER
   // ====================================================
 
   answerListener =
@@ -751,7 +1075,9 @@ export async function connectCaller(
           snapshot.val();
 
 
-        if (!answer) {
+        if (
+          !answer
+        ) {
 
           return;
 
@@ -760,6 +1086,15 @@ export async function connectCaller(
 
         if (
           !peerConnection
+        ) {
+
+          return;
+
+        }
+
+
+        if (
+          remoteDescriptionReady
         ) {
 
           return;
@@ -779,18 +1114,26 @@ export async function connectCaller(
 
         try {
 
-          await peerConnection.setRemoteDescription(
+          await peerConnection
+            .setRemoteDescription(
 
-            new RTCSessionDescription(
-              answer
-            )
+              new RTCSessionDescription(
+                answer
+              )
 
-          );
+            );
+
+
+          remoteDescriptionReady =
+            true;
 
 
           log(
-            "✅ Host answer received."
+            "✅ HOST ANSWER RECEIVED"
           );
+
+
+          await flushPendingCandidates();
 
         }
 
@@ -808,8 +1151,9 @@ export async function connectCaller(
     );
 
 
+
   // ====================================================
-  // RECEIVE HOST ICE CANDIDATES
+  // HOST ICE CANDIDATES
   // ====================================================
 
   hostCandidateListener =
@@ -827,49 +1171,18 @@ export async function connectCaller(
           snapshot.val();
 
 
-        if (
-          !candidate ||
-          !peerConnection
-        ) {
-
-          return;
-
-        }
-
-
-        try {
-
-          await peerConnection.addIceCandidate(
-
-            new RTCIceCandidate(
-              candidate
-            )
-
-          );
-
-
-          log(
-            "Host ICE candidate added."
-          );
-
-        }
-
-        catch (error) {
-
-          webRTCError(
-            "Unable to add host ICE candidate.",
-            error
-          );
-
-        }
+        await addRemoteCandidate(
+          candidate
+        );
 
       }
 
     );
 
 
+
   // ====================================================
-  // CONNECTION TIMEOUT
+  // TIMEOUT
   // ====================================================
 
   connectionTimeout =
@@ -880,11 +1193,21 @@ export async function connectCaller(
         if (
           peerConnection &&
           peerConnection.connectionState !==
-            "connected"
+          "connected"
         ) {
 
           webRTCError(
-            "WebRTC connection timed out."
+            "Caller WebRTC connection timed out."
+          );
+
+          log(
+            "ICE state:",
+            peerConnection.iceConnectionState
+          );
+
+          log(
+            "Connection state:",
+            peerConnection.connectionState
           );
 
         }
@@ -895,7 +1218,7 @@ export async function connectCaller(
 
 
   log(
-    "🎙️ Caller WebRTC setup complete."
+    "🎙️ CALLER WEBRTC READY"
   );
 
 
@@ -904,8 +1227,9 @@ export async function connectCaller(
 }
 
 
+
 // ======================================================
-// HOST CONNECT
+// HOST
 // ======================================================
 
 export async function connectHost(
@@ -916,21 +1240,26 @@ export async function connectHost(
     "======================================"
   );
 
+
   log(
-    "HOST CONNECTION STARTING"
+    "🎧 HOST CONNECTION STARTING"
   );
+
 
   log(
     "Caller ID:",
     callerId
   );
 
+
   log(
     "======================================"
   );
 
 
-  if (!callerId) {
+  if (
+    !callerId
+  ) {
 
     throw new Error(
       "Caller ID is missing."
@@ -943,11 +1272,22 @@ export async function connectHost(
     callerId;
 
 
+  remoteDescriptionReady =
+    false;
+
+
+  pendingRemoteCandidates =
+    [];
+
+
+
   // ====================================================
   // CLOSE OLD CONNECTION
   // ====================================================
 
-  if (peerConnection) {
+  if (
+    peerConnection
+  ) {
 
     try {
 
@@ -958,11 +1298,12 @@ export async function connectHost(
     catch (error) {
 
       console.warn(
-        "Unable to close old host connection:",
+        "Unable to close previous host connection:",
         error
       );
 
     }
+
 
     peerConnection =
       null;
@@ -971,6 +1312,7 @@ export async function connectHost(
 
 
   clearConnectionTimeout();
+
 
 
   // ====================================================
@@ -984,8 +1326,9 @@ export async function connectHost(
     );
 
 
+
   // ====================================================
-  // WAIT FOR CALLER OFFER
+  // WAIT FOR OFFER
   // ====================================================
 
   const offer =
@@ -1038,30 +1381,14 @@ export async function connectHost(
 
             function(error) {
 
-              if (!finished) {
+              if (
+                finished
+              ) {
 
-                finished =
-                  true;
-
-
-                unsubscribe();
-
-
-                reject(
-                  error
-                );
+                return;
 
               }
 
-            }
-
-          );
-
-
-        setTimeout(
-          function() {
-
-            if (!finished) {
 
               finished =
                 true;
@@ -1071,12 +1398,40 @@ export async function connectHost(
 
 
               reject(
-                new Error(
-                  "Timed out waiting for caller offer."
-                )
+                error
               );
 
             }
+
+          );
+
+
+        setTimeout(
+          function() {
+
+            if (
+              finished
+            ) {
+
+              return;
+
+            }
+
+
+            finished =
+              true;
+
+
+            unsubscribe();
+
+
+            reject(
+
+              new Error(
+                "Timed out waiting for caller offer."
+              )
+
+            );
 
           },
           30000
@@ -1086,27 +1441,38 @@ export async function connectHost(
     );
 
 
+
   log(
-    "Caller offer received."
+    "✅ CALLER OFFER RECEIVED"
   );
+
 
 
   // ====================================================
   // SET REMOTE DESCRIPTION
   // ====================================================
 
-  await peerConnection.setRemoteDescription(
+  await peerConnection
+    .setRemoteDescription(
 
-    new RTCSessionDescription(
-      offer
-    )
+      new RTCSessionDescription(
+        offer
+      )
 
-  );
+    );
+
+
+  remoteDescriptionReady =
+    true;
 
 
   log(
-    "Caller offer accepted."
+    "✅ CALLER OFFER ACCEPTED"
   );
+
+
+  await flushPendingCandidates();
+
 
 
   // ====================================================
@@ -1122,7 +1488,13 @@ export async function connectHost(
   );
 
 
-  // ====================================================
+  log(
+    "📡 Host answer created."
+  );
+
+
+
+// ====================================================
   // WAIT FOR ICE
   // ====================================================
 
@@ -1131,17 +1503,20 @@ export async function connectHost(
   );
 
 
-  const localDescription =
+  const description =
     peerConnection.localDescription;
 
 
-  if (!localDescription) {
+  if (
+    !description
+  ) {
 
     throw new Error(
-      "Unable to create host local description."
+      "Host local description was not created."
     );
 
   }
+
 
 
   // ====================================================
@@ -1158,10 +1533,10 @@ export async function connectHost(
     {
 
       type:
-        localDescription.type,
+        description.type,
 
       sdp:
-        localDescription.sdp
+        description.sdp
 
     }
 
@@ -1169,12 +1544,13 @@ export async function connectHost(
 
 
   log(
-    "✅ Host answer sent to caller."
+    "✅ HOST ANSWER SENT"
   );
 
 
+
   // ====================================================
-  // RECEIVE CALLER ICE
+  // CALLER ICE
   // ====================================================
 
   callerCandidateListener =
@@ -1192,49 +1568,14 @@ export async function connectHost(
           snapshot.val();
 
 
-        if (
-          !candidate ||
-          !peerConnection
-        ) {
-
-          return;
-
-        }
-
-
-        try {
-
-          await peerConnection.addIceCandidate(
-
-            new RTCIceCandidate(
-              candidate
-            )
-
-          );
-
-
-          log(
-            "Caller ICE candidate added."
-          );
-
-        }
-
-        catch (error) {
-
-          webRTCError(
-            "Unable to add caller ICE candidate.",
-            error
-          );
-
-        }
+        await addRemoteCandidate(
+          candidate
+        );
 
       }
 
-    );
-
-
-  // ====================================================
-  // HOST CONNECTION TIMEOUT
+    );// ====================================================
+  // TIMEOUT
   // ====================================================
 
   connectionTimeout =
@@ -1245,11 +1586,23 @@ export async function connectHost(
         if (
           peerConnection &&
           peerConnection.connectionState !==
-            "connected"
+          "connected"
         ) {
 
           webRTCError(
             "Host WebRTC connection timed out."
+          );
+
+
+          log(
+            "ICE state:",
+            peerConnection.iceConnectionState
+          );
+
+
+          log(
+            "Connection state:",
+            peerConnection.connectionState
           );
 
         }
@@ -1260,7 +1613,7 @@ export async function connectHost(
 
 
   log(
-    "🎙️ Host WebRTC setup complete."
+    "🎧 HOST WEBRTC READY"
   );
 
 
@@ -1269,19 +1622,23 @@ export async function connectHost(
 }
 
 
+
 // ======================================================
-// MUTE LOCAL MICROPHONE
+// MUTE MICROPHONE
 // ======================================================
 
 export function muteLocalMicrophone(
   muted
 ) {
 
-  if (!localStream) {
+  if (
+    !localStream
+  ) {
 
     log(
-      "No microphone stream available."
+      "No local microphone stream."
     );
+
 
     return;
 
@@ -1301,12 +1658,21 @@ export function muteLocalMicrophone(
 
 
   log(
+
     muted
-      ? "🔇 Microphone muted."
-      : "🎙️ Microphone unmuted."
+
+      ?
+
+    "🔇 MICROPHONE MUTED"
+
+      :
+
+    "🎙️ MICROPHONE ON"
+
   );
 
 }
+
 
 
 // ======================================================
@@ -1318,25 +1684,40 @@ export async function closeWebRTC(
 ) {
 
   log(
-    "Closing WebRTC connection..."
+    "Closing WebRTC..."
   );
 
 
   clearConnectionTimeout();
 
 
-  // ====================================================
+// ====================================================
   // STOP MICROPHONE
   // ====================================================
 
-  if (localStream) {
+  if (
+    localStream
+  ) {
 
     localStream
       .getTracks()
       .forEach(
         function(track) {
 
-          track.stop();
+          try {
+
+            track.stop();
+
+          }
+
+          catch (error) {
+
+            console.warn(
+              "Unable to stop microphone track:",
+              error
+            );
+
+          }
 
         }
       );
@@ -1348,11 +1729,14 @@ export async function closeWebRTC(
   }
 
 
+
   // ====================================================
   // CLOSE PEER
   // ====================================================
 
-if (peerConnection) {
+  if (
+    peerConnection
+  ) {
 
     try {
 
@@ -1363,7 +1747,7 @@ if (peerConnection) {
     catch (error) {
 
       console.warn(
-        "Peer connection close error:",
+        "Unable to close peer connection:",
         error
       );
 
@@ -1376,11 +1760,14 @@ if (peerConnection) {
   }
 
 
+
   // ====================================================
-  // REMOVE WEBRTC SIGNALING DATA
+  // REMOVE SIGNALING DATA
   // ====================================================
 
-  if (callerId) {
+  if (
+    callerId
+  ) {
 
     try {
 
@@ -1395,7 +1782,7 @@ if (peerConnection) {
 
 
       log(
-        "WebRTC Firebase data removed."
+        "✅ WebRTC Firebase data removed."
       );
 
     }
@@ -1412,28 +1799,44 @@ if (peerConnection) {
   }
 
 
+
+  // ====================================================
+  // RESET
+  // ====================================================
+
   answerListener =
     null;
+
 
   hostCandidateListener =
     null;
 
+
   callerCandidateListener =
     null;
+
 
   currentCallerId =
     null;
 
 
+  remoteDescriptionReady =
+    false;
+
+
+  pendingRemoteCandidates =
+    [];
+
+
   log(
-    "✅ WebRTC closed."
+    "✅ WEBRTC CLOSED"
   );
 
 }
 
 
 // ======================================================
-// EXPORT CURRENT CONNECTION
+// GET PEER CONNECTION
 // ======================================================
 
 export function getPeerConnection() {
@@ -1443,8 +1846,9 @@ export function getPeerConnection() {
 }
 
 
+
 // ======================================================
-// EXPORT MICROPHONE STREAM
+// GET LOCAL STREAM
 // ======================================================
 
 export function getLocalStream() {
@@ -1454,14 +1858,41 @@ export function getLocalStream() {
 }
 
 
+
 // ======================================================
 // INITIAL MESSAGE
 // ======================================================
 
 log(
-  "WebRTC Engine Version 4.0 loaded."
+  "======================================"
 );
 
+
 log(
-  "STUN + ICE gathering protection enabled."
+  "KULZZY RADIO WEBRTC ENGINE"
+);
+
+
+log(
+  "VERSION 5.0"
+);
+
+
+log(
+  "ICE candidate queue enabled."
+);
+
+
+log(
+  "Remote-description protection enabled."
+);
+
+
+log(
+  "STUN servers enabled."
+);
+
+
+log(
+  "======================================"
 );
