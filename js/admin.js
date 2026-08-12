@@ -1158,75 +1158,165 @@ function startAdmin() {
   // ALLOW CALLER
   // ====================================================
 
-  async function allowCaller(uid) {
+async function allowCaller(uid) {
 
-    const caller =
-      callers[uid];
+  const caller =
+    callers[uid];
 
+  if (!caller) {
 
-    if (!caller) {
+    showControlMessage(
+      "❌ Caller is no longer available."
+    );
 
-      showControlMessage(
-        "❌ Caller is no longer available."
+    return;
+
+  }
+
+  if (
+    caller.online === false ||
+    caller.status === "disconnected"
+  ) {
+
+    showControlMessage(
+      "📱 This caller is offline. Their number remains in the list."
+    );
+
+    return;
+
+  }
+
+  try {
+
+    // ==================================================
+    // ALLOW THIS CALLER TO SPEAK
+    // ==================================================
+
+    if (allowOneMode) {
+
+      const updates = {};
+
+      Object.keys(callers).forEach(
+        function (otherUid) {
+
+          if (otherUid === uid) {
+            return;
+          }
+
+          updates[
+            `callers/${otherUid}/muted`
+          ] = true;
+
+          updates[
+            `callers/${otherUid}/allowedToSpeak`
+          ] = false;
+
+          updates[
+            `callers/${otherUid}/status`
+          ] = "muted";
+
+        }
       );
 
-      return;
+      updates[
+        `callers/${uid}/muted`
+      ] = false;
+
+      updates[
+        `callers/${uid}/allowedToSpeak`
+      ] = true;
+
+      updates[
+        `callers/${uid}/status`
+      ] = "speaking";
+
+      await update(
+        ref(db),
+        updates
+      );
 
     }
 
+    else {
+
+      await update(
+        ref(
+          db,
+          `callers/${uid}`
+        ),
+        {
+
+          muted: false,
+
+          allowedToSpeak: true,
+
+          status: "speaking",
+
+          online: true
+
+        }
+      );
+
+    }
+
+    // ==================================================
+    // CONNECT WEBRTC TO THIS CALLER
+    // ==================================================
+
+    showControlMessage(
+      "🎙️ Caller allowed. Connecting microphone..."
+    );
 
     if (
-      caller.online === false ||
-      caller.status ===
-        "disconnected"
+      connectedCaller &&
+      connectedCaller !== uid
     ) {
 
-      showControlMessage(
-        "📱 This caller is offline. Their number remains in the list."
-      );
+      try {
 
-      return;
+        await closeWebRTC(
+          connectedCaller
+        );
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "Previous WebRTC close error:",
+          error
+        );
+
+      }
 
     }
 
+    await connectHost(uid);
 
-    try {
+    connectedCaller = uid;
 
-      if (allowOneMode) {
+    selectedCaller = uid;
 
-        const updates =
-          {};
+    showControlMessage(
+      "🎙️ Caller is allowed. They can now allow microphone access and talk on-air."
+    );
 
+  }
 
-        Object.keys(callers)
-          .forEach(
-            function (otherUid) {
+  catch (error) {
 
-              if (
-                otherUid === uid
-              ) {
+    console.error(
+      "Allow caller error:",
+      error
+    );
 
-                return;
+    showControlMessage(
+      "❌ Unable to connect this caller."
+    );
 
-              }
+  }
 
-
-              updates[
-                `callers/${otherUid}/muted`
-              ] = true;
-
-
-              updates[
-                `callers/${otherUid}/allowedToSpeak`
-              ] = false;
-
-
-              updates[
-                `callers/${otherUid}/status`
-              ] = "muted";
-
-            }
-          );
+}
 
 
         updates[
