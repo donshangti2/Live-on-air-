@@ -191,208 +191,174 @@ function startAdmin() {
 
   }
 
+// ====================================================
+// LOGIN
+// ====================================================
 
-  // ====================================================
-  // LOGIN
-  // ====================================================
+loginButton.addEventListener(
+  "click",
+  async function () {
 
-  loginButton.addEventListener(
-    "click",
-    async function () {
+    console.log(
+      "🔐 LOGIN BUTTON CLICKED"
+    );
 
-      console.log(
-        "🔐 LOGIN BUTTON CLICKED"
+    clearLoginMessage();
+
+    const email =
+      adminEmail.value.trim();
+
+    const password =
+      adminPassword.value;
+
+    if (!email) {
+
+      showLoginMessage(
+        "Please enter your admin email."
       );
 
-
-      clearLoginMessage();
-
-
-      const email =
-        adminEmail.value.trim();
-
-      const password =
-        adminPassword.value;
-
-
-      if (!email) {
-
-        showLoginMessage(
-          "Please enter your admin email."
-        );
-
-        return;
-
-      }
-
-
-      if (!password) {
-
-        showLoginMessage(
-          "Please enter your password."
-        );
-
-        return;
-
-      }
-
-
-      loginButton.disabled =
-        true;
-
-      loginButton.textContent =
-        "LOGGING IN...";
-
-
-      try {
-
-        console.log(
-          "Attempting Firebase login..."
-        );
-
-
-        const result =
-          await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-          );
-
-
-        console.log(
-          "✅ Firebase login successful."
-        );
-
-        console.log(
-          "Admin email:",
-          result.user.email
-        );
-
-        console.log(
-          "Admin UID:",
-          result.user.uid
-        );
-
-
-      } catch (error) {
-
-        console.error(
-          "❌ Firebase login error:",
-          error
-        );
-
-
-        let message =
-          "Unable to login.";
-
-
-        if (
-          error.code ===
-          "auth/invalid-credential"
-        ) {
-
-          message =
-            "Incorrect email or password.";
-
-        }
-
-        else if (
-          error.code ===
-          "auth/invalid-email"
-        ) {
-
-          message =
-            "Please enter a valid email address.";
-
-        }
-
-        else if (
-          error.code ===
-          "auth/user-not-found"
-        ) {
-
-          message =
-            "Admin account was not found.";
-
-        }
-
-        else if (
-          error.code ===
-          "auth/wrong-password"
-        ) {
-
-          message =
-            "Incorrect password.";
-
-        }
-
-        else if (
-          error.code ===
-          "auth/too-many-requests"
-        ) {
-
-          message =
-            "Too many login attempts. Please try again later.";
-
-        }
-
-        else if (
-          error.code ===
-          "auth/user-disabled"
-        ) {
-
-          message =
-            "This admin account has been disabled.";
-
-        }
-
-        else {
-
-          message =
-            error.message ||
-            "Unable to login.";
-
-        }
-
-
-        showLoginMessage(
-          message
-        );
-
-
-        loginButton.disabled =
-          false;
-
-        loginButton.textContent =
-          "LOGIN";
-
-      }
+      return;
 
     }
-  );
 
+    if (!password) {
 
-  // ====================================================
-  // ENTER KEY LOGIN
-  // ====================================================
+      showLoginMessage(
+        "Please enter your password."
+      );
 
-  adminPassword.addEventListener(
-    "keydown",
-    function (event) {
+      return;
+
+    }
+
+    loginButton.disabled =
+      true;
+
+    loginButton.textContent =
+      "LOGGING IN...";
+
+    try {
+
+      console.log(
+        "Attempting Firebase login..."
+      );
+
+      const result =
+        await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+
+      console.log(
+        "✅ Firebase login successful."
+      );
+
+      console.log(
+        "Admin email:",
+        result.user.email
+      );
+
+      console.log(
+        "Admin UID:",
+        result.user.uid
+      );
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "❌ Firebase login error:",
+        error
+      );
+
+      let message =
+        "Unable to login.";
 
       if (
-        event.key ===
-        "Enter"
+        error.code ===
+        "auth/invalid-credential"
       ) {
 
-        event.preventDefault();
-
-        loginButton.click();
+        message =
+          "Incorrect email or password.";
 
       }
 
+      else if (
+        error.code ===
+        "auth/invalid-email"
+      ) {
+
+        message =
+          "Please enter a valid email address.";
+
+      }
+
+      else if (
+        error.code ===
+        "auth/user-not-found"
+      ) {
+
+        message =
+          "Admin account was not found.";
+
+      }
+
+      else if (
+        error.code ===
+        "auth/wrong-password"
+      ) {
+
+        message =
+          "Incorrect password.";
+
+      }
+
+      else if (
+        error.code ===
+        "auth/too-many-requests"
+      ) {
+
+        message =
+          "Too many login attempts. Please try again later.";
+
+      }
+
+      else if (
+        error.code ===
+        "auth/user-disabled"
+      ) {
+
+        message =
+          "This admin account has been disabled.";
+
+      }
+
+      else {
+
+        message =
+          error.message ||
+          "Unable to login.";
+
+      }
+
+      showLoginMessage(
+        message
+      );
+
+      loginButton.disabled =
+        false;
+
+      loginButton.textContent =
+        "LOGIN";
+
     }
-  );
+
+  }
+);
+  
 
 
   // ====================================================
