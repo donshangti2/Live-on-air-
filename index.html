@@ -268,6 +268,88 @@
     }
 
 
+    /* ==================================================
+       MICROPHONE CONTROL
+       ================================================== */
+
+    .mic-controls {
+
+      margin-top: 25px;
+
+      text-align: center;
+
+    }
+
+
+    .mic-button {
+
+      width: 100%;
+
+      padding: 20px;
+
+      border: none;
+
+      border-radius: 16px;
+
+      background: #ffd000;
+
+      color: #001a3a;
+
+      font-size: 19px;
+
+      font-weight: 900;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 8px 20px
+        rgba(0,0,0,.25);
+
+      transition:
+        transform .15s ease,
+        opacity .15s ease;
+
+    }
+
+
+    .mic-button:active {
+
+      transform: scale(.98);
+
+    }
+
+
+    .mic-button.muted {
+
+      background: #d40000;
+
+      color: #ffffff;
+
+    }
+
+
+    .mic-button:disabled {
+
+      opacity: .55;
+
+      cursor: not-allowed;
+
+    }
+
+
+    .mic-status {
+
+      margin-top: 12px;
+
+      color: #c7d5e8;
+
+      font-size: 14px;
+
+      line-height: 1.5;
+
+    }
+
+
     .hidden {
 
       display: none !important;
@@ -368,6 +450,7 @@
     <h1>
 
       Join
+
       <span class="yellow">
         Kulzzy Radio
       </span>
@@ -413,6 +496,8 @@
 
 
       <button
+
+        type="button"
 
         class="join-button"
 
@@ -491,6 +576,49 @@
       </div>
 
 
+      <!-- =========================================
+           MICROPHONE CONTROLS
+      ========================================== -->
+
+      <div
+
+        class="mic-controls hidden"
+
+        id="micControls"
+
+      >
+
+        <button
+
+          type="button"
+
+          class="mic-button"
+
+          id="micButton"
+
+        >
+
+          🎙️ START TALKING
+
+        </button>
+
+
+        <div
+
+          class="mic-status"
+
+          id="micStatus"
+
+        >
+
+          Your microphone will start when you tap
+          the button above.
+
+        </div>
+
+      </div>
+
+
     </div>
 
 
@@ -516,22 +644,17 @@
   // =====================================================
   // KULZZY RADIO NETWORK
   // LIVE COMMUNITY
-  // VERSION 3.0
+  // PUBLIC PAGE
   //
-  // IMPORTANT FIX:
+  // IMPORTANT:
   //
-  // The caller record is NO LONGER stored using
-  // Firebase Authentication UID.
+  // DO NOT CHANGE:
   //
-  // Each phone number now receives its own
-  // permanent caller ID.
+  // admin.js
+  // firebase.js
+  // webrtc.js
   //
-  // This prevents:
-  //
-  // NUMBER 1
-  // from being replaced by
-  // NUMBER 2
-  //
+  // This page uses the existing WebRTC engine.
   // =====================================================
 
 
@@ -557,8 +680,6 @@
 
     ref,
 
-    set,
-
     update,
 
     onValue,
@@ -566,6 +687,17 @@
     onDisconnect
 
   } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
+
+  import {
+
+    connectCaller,
+
+    closeWebRTC,
+
+    muteLocalMicrophone
+
+  } from "./js/webrtc.js";
 
 
 
@@ -622,6 +754,24 @@
     );
 
 
+  const micControls =
+    document.getElementById(
+      "micControls"
+    );
+
+
+  const micButton =
+    document.getElementById(
+      "micButton"
+    );
+
+
+  const micStatus =
+    document.getElementById(
+      "micStatus"
+    );
+
+
 
   // =====================================================
   // VARIABLES
@@ -652,6 +802,14 @@
     null;
 
 
+  let microphoneMuted =
+    true;
+
+
+  let webRTCConnected =
+    false;
+
+
 
   // =====================================================
   // PHONE NORMALIZATION
@@ -673,15 +831,6 @@
         );
 
 
-    // -----------------------------------------------
-    // 08012345678
-    //
-    // becomes
-    //
-    // +2348012345678
-    // -----------------------------------------------
-
-
     if (
 
       value.startsWith("0") &&
@@ -697,15 +846,6 @@
         value.substring(1);
 
     }
-
-
-    // -----------------------------------------------
-    // 2348012345678
-    //
-    // becomes
-    //
-    // +2348012345678
-    // -----------------------------------------------
 
 
     if (
@@ -732,18 +872,7 @@
 
 
   // =====================================================
-  // CREATE SAFE FIREBASE CALLER ID
-  //
-  // PHONE NUMBER
-  //
-  // +2349017759411
-  //
-  // becomes
-  //
-  // caller_2349017759411
-  //
-  // Firebase can safely use this as a key.
-  //
+  // CREATE CALLER ID
   // =====================================================
 
 
@@ -840,6 +969,322 @@
 
 
   // =====================================================
+  // MICROPHONE CONTROL
+  // =====================================================
+
+
+  function showMicControls() {
+
+
+    if (!micControls) {
+
+      return;
+
+    }
+
+
+    micControls.classList.remove(
+      "hidden"
+    );
+
+
+    microphoneMuted =
+      true;
+
+
+    updateMicButton();
+
+  }
+
+
+
+  function hideMicControls() {
+
+
+    if (!micControls) {
+
+      return;
+
+    }
+
+
+    micControls.classList.add(
+      "hidden"
+    );
+
+  }
+
+
+
+  function updateMicButton() {
+
+
+    if (!micButton) {
+
+      return;
+
+    }
+
+
+    if (microphoneMuted) {
+
+      micButton.classList.remove(
+        "muted"
+      );
+
+
+      micButton.textContent =
+        "🎙️ START TALKING";
+
+
+      if (micStatus) {
+
+        micStatus.textContent =
+          "Tap the button to start talking on-air.";
+
+      }
+
+    }
+
+    else {
+
+      micButton.classList.add(
+        "muted"
+      );
+
+
+      micButton.textContent =
+        "🔇 MUTE MICROPHONE";
+
+
+      if (micStatus) {
+
+        micStatus.textContent =
+          "Your microphone is ON. You are talking on-air.";
+
+      }
+
+    }
+
+  }
+
+
+
+  // =====================================================
+  // START / MUTE MICROPHONE
+  // =====================================================
+
+
+  async function toggleMicrophone() {
+
+
+    if (!callerUid) {
+
+      showError(
+        "Please join the live community first."
+      );
+
+      return;
+
+    }
+
+
+    try {
+
+
+      // ================================================
+      // FIRST TIME: CONNECT WEBRTC
+      // ================================================
+
+
+      if (!webRTCConnected) {
+
+
+        if (micButton) {
+
+          micButton.disabled =
+            true;
+
+          micButton.textContent =
+            "🎙️ CONNECTING...";
+
+        }
+
+
+        if (micStatus) {
+
+          micStatus.textContent =
+            "Connecting your microphone to the host...";
+
+        }
+
+
+        await connectCaller(
+          callerUid
+        );
+
+
+        webRTCConnected =
+          true;
+
+
+        microphoneMuted =
+          false;
+
+
+        updateMicButton();
+
+
+        await update(
+
+          callerRef,
+
+          {
+
+            muted:
+              false,
+
+            allowedToSpeak:
+              true,
+
+            status:
+              "speaking",
+
+            online:
+              true
+
+          }
+
+        );
+
+
+        console.log(
+          "🎙️ Caller WebRTC connected."
+        );
+
+
+        return;
+
+      }
+
+
+
+      // ================================================
+      // ALREADY CONNECTED
+      // TOGGLE MICROPHONE
+      // ================================================
+
+
+      microphoneMuted =
+        !microphoneMuted;
+
+
+      muteLocalMicrophone(
+        microphoneMuted
+      );
+
+
+      await update(
+
+        callerRef,
+
+        {
+
+          muted:
+            microphoneMuted,
+
+          allowedToSpeak:
+            !microphoneMuted,
+
+          status:
+            microphoneMuted
+              ? "muted"
+              : "speaking"
+
+        }
+
+      );
+
+
+      updateMicButton();
+
+    }
+
+    catch (error) {
+
+
+      console.error(
+        "Microphone/WebRTC error:",
+        error
+      );
+
+
+      webRTCConnected =
+        false;
+
+
+      microphoneMuted =
+        true;
+
+
+      if (micButton) {
+
+        micButton.disabled =
+          false;
+
+      }
+
+
+      updateMicButton();
+
+
+      if (
+        error &&
+        error.name ===
+          "NotAllowedError"
+      ) {
+
+        showError(
+          "Microphone permission was denied. Please allow microphone access in your browser."
+        );
+
+      }
+
+      else {
+
+        showError(
+          "Unable to connect your microphone. Please try again."
+        );
+
+      }
+
+
+      if (micStatus) {
+
+        micStatus.textContent =
+          "Microphone connection failed. Please try again.";
+
+      }
+
+    }
+
+    finally {
+
+
+      if (micButton) {
+
+        micButton.disabled =
+          false;
+
+      }
+
+    }
+
+  }
+
+
+
+  // =====================================================
   // UPDATE STATUS FROM FIREBASE
   // =====================================================
 
@@ -864,7 +1309,9 @@
     if (
 
       caller.status ===
-      "disconnected"
+        "disconnected" ||
+
+      caller.online === false
 
     ) {
 
@@ -880,6 +1327,9 @@
       );
 
 
+      hideMicControls();
+
+
       return;
 
     }
@@ -887,55 +1337,63 @@
 
 
     // ================================================
-    // ALLOWED TO SPEAK
-    // ================================================
-
-
-if (
-  caller.allowedToSpeak === true &&
-  caller.muted === false
-) {
-
-  showStatus(
-    "🎙️",
-    "YOU ARE LIVE!",
-    "The host has allowed you to speak. Tap the microphone button below to start talking on-air."
-  );
-
-  // Show the microphone controls
-  const micButton =
-    document.getElementById("micButton");
-
-  if (micButton) {
-    micButton.classList.remove("hidden");
-  }
-
-  return;
-}
-
-
-
-    // ================================================
-    // MUTED
+    // HOST ALLOWED CALLER
     // ================================================
 
 
     if (
 
-      caller.muted === true
+      caller.allowedToSpeak ===
+        true
 
     ) {
 
 
       showStatus(
 
-        "🔇",
+        "🎙️",
+
+        "YOU ARE LIVE!",
+
+        "The host has allowed you to speak. Tap the microphone button below to start talking on-air."
+
+      );
+
+
+      showMicControls();
+
+
+      return;
+
+    }
+
+
+
+    // ================================================
+    // MUTED / WAITING
+    // ================================================
+
+
+    if (
+
+      caller.muted ===
+        true
+
+    ) {
+
+
+      showStatus(
+
+        "⏳",
 
         "You're in the queue",
 
         "You are connected. Please wait for the host to allow you to speak."
 
       );
+
+
+      hideMicControls();
 
 
       return;
@@ -959,30 +1417,22 @@ if (
 
     );
 
+
+    hideMicControls();
+
   }
 
 
 
   // =====================================================
-  // STOP OLD CALLER LISTENER
-  //
-  // IMPORTANT:
-  //
-  // When changing from caller A to caller B,
-  // we stop listening to caller A.
-  //
+  // STOP CALLER LISTENER
   // =====================================================
 
 
   function stopCallerListener() {
 
 
-    if (
-
-      callerUnsubscribe
-
-    ) {
-
+    if (callerUnsubscribe) {
 
       try {
 
@@ -993,11 +1443,8 @@ if (
       catch (error) {
 
         console.error(
-
           "Unable to stop caller listener:",
-
           error
-
         );
 
       }
@@ -1017,7 +1464,7 @@ if (
 
 
   // =====================================================
-  // WATCH CURRENT CALLER
+  // WATCH CALLER
   // =====================================================
 
 
@@ -1068,11 +1515,8 @@ if (
 
 
           console.error(
-
             "Caller listener error:",
-
             error
-
           );
 
 
@@ -1089,11 +1533,6 @@ if (
 
   // =====================================================
   // MARK CURRENT CALLER OFFLINE
-  //
-  // This does NOT delete the caller.
-  //
-  // The number remains visible in the admin panel.
-  //
   // =====================================================
 
 
@@ -1140,13 +1579,9 @@ if (
 
     catch (error) {
 
-
       console.error(
-
-        "Unable to mark previous caller offline:",
-
+        "Unable to mark caller offline:",
         error
-
       );
 
     }
@@ -1156,7 +1591,7 @@ if (
 
 
   // =====================================================
-  // REGISTER / REJOIN CALLER
+  // REGISTER CALLER
   // =====================================================
 
 
@@ -1167,39 +1602,26 @@ if (
 
 
       showError(
-
         "Connecting to the live system. Please wait a moment and try again."
-
       );
 
 
       return;
 
     }
-
-
-
-    // ================================================
-    // GET PHONE
-    // ================================================
 
 
     const phone =
 
       normalizePhone(
-
         phoneInput.value
-
       );
 
 
     if (!phone) {
 
-
       showError(
-
         "Please enter your phone number."
-
       );
 
 
@@ -1208,56 +1630,28 @@ if (
     }
 
 
-
-    // ================================================
-    // VALIDATION
-    // ================================================
-
-
-    if (
-
-      phone.length < 10
-
-    ) {
-
+    if (phone.length < 10) {
 
       showError(
-
         "Please enter a valid phone number."
-
       );
 
 
       return;
 
     }
-
 
 
     clearError();
 
 
-
-    // ================================================
-    // CREATE PHONE-BASED CALLER ID
-    //
-    // THIS IS THE MAIN FIX.
-    // ================================================
-
-
     const newCallerUid =
-
-      createCallerId(
-        phone
-      );
+      createCallerId(phone);
 
 
 
     // ================================================
-    // IF THIS BROWSER WAS ALREADY CONNECTED TO
-    // ANOTHER NUMBER, MARK THAT NUMBER OFFLINE.
-    //
-    // DO NOT DELETE IT.
+    // IF CHANGING NUMBER
     // ================================================
 
 
@@ -1277,8 +1671,8 @@ if (
 
       stopCallerListener();
 
-    }
 
+    }
 
 
     callerUid =
@@ -1289,7 +1683,6 @@ if (
       phone;
 
 
-
     callerRef =
 
       ref(
@@ -1297,7 +1690,6 @@ if (
         db,
 
         "callers/" +
-
         callerUid
 
       );
@@ -1305,61 +1697,39 @@ if (
 
 
     // ================================================
-    // SAVE CURRENT PHONE LOCALLY
+    // SAVE LOCALLY
     // ================================================
 
-
     localStorage.setItem(
-
       "kulzzy_live_phone",
-
       phone
-
     );
-
 
     localStorage.setItem(
-
       "kulzzy_live_caller_uid",
-
       callerUid
-
     );
-
 
 
     // ================================================
     // BUTTON
     // ================================================
 
-
     joinButton.disabled =
       true;
-
 
     joinButton.textContent =
       "CONNECTING...";
 
 
-
     try {
 
-
       // ==============================================
-      // SAVE CALLER
-      //
-      // IMPORTANT:
-      //
-      // We use UPDATE instead of replacing the
-      // entire caller record.
-      //
+      // REGISTER CALLER
       // ==============================================
-
 
       await update(
-
         callerRef,
-
         {
 
           phone:
@@ -1384,23 +1754,15 @@ if (
             Date.now()
 
         }
-
       );
 
 
-
       // ==============================================
-      // AUTOMATICALLY MARK THIS CALLER OFFLINE
-      // WHEN CONNECTION IS LOST.
-      //
-      // DO NOT DELETE THE NUMBER.
+      // KEEP CALLER ONLINE WHILE CONNECTED
       // ==============================================
-
 
       await onDisconnect(
-
         callerRef
-
       ).update({
 
         online:
@@ -1421,32 +1783,26 @@ if (
       });
 
 
-
       // ==============================================
-      // UPDATE INPUT
+      // UPDATE PHONE FIELD
       // ==============================================
-
 
       phoneInput.value =
         phone;
 
 
-
       // ==============================================
-      // HIDE FORM
+      // HIDE JOIN FORM
       // ==============================================
-
 
       joinArea.classList.add(
         "hidden"
       );
 
 
-
       // ==============================================
       // SHOW WAITING STATUS
       // ==============================================
-
 
       showStatus(
 
@@ -1459,88 +1815,60 @@ if (
       );
 
 
+      hideMicControls();
+
 
       // ==============================================
-      // START LISTENING TO THIS CALLER ONLY
+      // START FIREBASE LISTENER
       // ==============================================
-
 
       startCallerListener();
 
 
-
       console.log(
-
         "===================================="
-
       );
 
-
       console.log(
-
         "🎙️ KULZZY CALLER REGISTERED"
-
       );
 
-
       console.log(
-
         "Phone:",
-
         phone
-
       );
 
-
       console.log(
-
         "Caller ID:",
-
         callerUid
-
       );
 
-
       console.log(
-
         "Firebase path:",
-
         "callers/" + callerUid
-
       );
-
 
       console.log(
-
         "===================================="
-
       );
-
 
     }
 
     catch (error) {
 
-
       console.error(
-
         "Caller registration error:",
-
         error
-
       );
 
 
       showError(
-
         "Unable to connect to the live system. Please try again."
-
       );
 
 
       joinButton.disabled =
         false;
-
 
       joinButton.textContent =
         "🎙️ JOIN LIVE";
@@ -1555,13 +1883,9 @@ if (
   // JOIN BUTTON
   // =====================================================
 
-
   joinButton.addEventListener(
-
     "click",
-
     registerCaller
-
   );
 
 
@@ -1570,248 +1894,226 @@ if (
   // ENTER KEY
   // =====================================================
 
-
   phoneInput.addEventListener(
-
     "keydown",
-
     function(event) {
 
-
       if (
-
         event.key ===
         "Enter"
-
       ) {
 
-
         event.preventDefault();
-
 
         registerCaller();
 
       }
 
     }
-
   );
 
 
 
   // =====================================================
-  // AUTHENTICATION
+  // MICROPHONE BUTTON
   // =====================================================
 
+  if (micButton) {
+
+    micButton.addEventListener(
+      "click",
+      toggleMicrophone
+    );
+
+  }
+
+
+
+  // =====================================================
+  // FIREBASE AUTHENTICATION
+  // =====================================================
 
   onAuthStateChanged(
-
     auth,
-
     async function(user) {
 
-
-      // ==============================================
-      // USER EXISTS
-      // ==============================================
-
+      // ================================================
+      // USER ALREADY EXISTS
+      // ================================================
 
       if (user) {
-
 
         currentUser =
           user;
 
 
         console.log(
-
           "Firebase anonymous authentication ready:",
-
           user.uid
-
         );
 
 
-
-        // ============================================
-        // LOAD PREVIOUS PHONE
-        // ============================================
-
+        // ==============================================
+        // LOAD SAVED PHONE
+        // ==============================================
 
         const savedPhone =
-  localStorage.getItem(
-    "kulzzy_live_phone"
+          localStorage.getItem(
+            "kulzzy_live_phone"
+          );
+
+
+        if (
+          savedPhone &&
+          !currentPhone
+        ) {
+
+          phoneInput.value =
+            savedPhone;
+
+        }
+
+
+        // ==============================================
+        // SAVED CALLER ID
+        // ==============================================
+
+        const savedCallerUid =
+          localStorage.getItem(
+            "kulzzy_live_caller_uid"
+          );
+
+
+        if (savedCallerUid) {
+
+          console.log(
+            "Previous caller ID found:",
+            savedCallerUid
+          );
+
+        }
+
+
+        console.log(
+          "🎙️ Live Community is ready."
+        );
+
+
+        return;
+
+      }
+
+
+      // ================================================
+      // NO USER YET
+      // ================================================
+
+      console.log(
+        "No Firebase anonymous user found."
+      );
+
+
+      // ================================================
+      // SIGN IN ANONYMOUSLY
+      // ================================================
+
+      try {
+
+        console.log(
+          "🔐 Starting Firebase anonymous authentication..."
+        );
+
+
+        await signInAnonymously(
+          auth
+        );
+
+
+        console.log(
+          "✅ Firebase anonymous authentication started."
+        );
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "❌ Firebase anonymous authentication error:",
+          error
+        );
+
+
+        showError(
+          "Unable to connect to the live system. Please refresh the page and try again."
+        );
+
+      }
+
+    }
   );
 
 
-if (
-  savedPhone &&
-  !currentPhone
-) {
 
-  phoneInput.value =
-    savedPhone;
+  // =====================================================
+  // PAGE CLEANUP
+  // =====================================================
 
-}
+  window.addEventListener(
+    "beforeunload",
+    function() {
 
+      /*
+       * We intentionally DO NOT DELETE
+       * the caller record.
+       *
+       * The caller's phone number remains
+       * available in the admin panel.
+       */
 
-// ============================================
-// CHECK IF THERE IS A SAVED CALLER ID
-// ============================================
+      console.log(
+        "🎙️ Leaving Kulzzy Radio Live Community."
+      );
 
-const savedCallerUid =
-  localStorage.getItem(
-    "kulzzy_live_caller_uid"
+    }
   );
 
 
-if (
-  savedCallerUid &&
-  !callerUid
-) {
+
+  // =====================================================
+  // INITIAL MESSAGE
+  // =====================================================
 
   console.log(
-    "Previous caller ID found:",
-    savedCallerUid
+    "=========================================="
   );
-
-}
-
-
-// ============================================
-// FIREBASE AUTHENTICATION READY
-// ============================================
-
-console.log(
-  "🎙️ Live Community is ready."
-);
-
-
-// ============================================
-// IF USER IS ALREADY AUTHENTICATED
-// ============================================
-
-if (
-  !callerListenerStarted &&
-  callerRef
-) {
-
-  startCallerListener();
-
-}
-
-
-return;
-
-}
-
-
-// ==============================================
-// NO USER YET
-// ==============================================
-
-console.log(
-  "No Firebase anonymous user found."
-);
-
-
-// ==============================================
-// SIGN IN ANONYMOUSLY
-// ==============================================
-
-try {
 
   console.log(
-    "🔐 Starting Firebase anonymous authentication..."
+    "🎙️ KULZZY RADIO NETWORK"
   );
-
-
-  await signInAnonymously(
-    auth
-  );
-
 
   console.log(
-    "✅ Firebase anonymous authentication started."
+    "LIVE COMMUNITY"
   );
 
-
-}
-
-catch (error) {
-
-  console.error(
-    "❌ Firebase anonymous authentication error:",
-    error
+  console.log(
+    "Public Live Community loaded."
   );
 
-
-  showError(
-    "Unable to connect to the live system. Please refresh the page and try again."
+  console.log(
+    "Phone-based caller IDs enabled."
   );
 
-}
+  console.log(
+    "Caller records are NOT deleted."
+  );
 
-}
+  console.log(
+    "WebRTC microphone controls enabled."
+  );
 
-);
-
-
-// =====================================================
-// PAGE CLEANUP
-// =====================================================
-
-window.addEventListener(
-  "beforeunload",
-  function () {
-
-    /*
-     * We intentionally DO NOT delete
-     * the caller record from Firebase.
-     *
-     * The number remains in the admin
-     * caller list.
-     */
-
-    console.log(
-      "🎙️ Leaving Kulzzy Radio Live Community."
-    );
-
-  }
-);
-
-
-// =====================================================
-// INITIAL PAGE MESSAGE
-// =====================================================
-
-console.log(
-  "=========================================="
-);
-
-console.log(
-  "🎙️ KULZZY RADIO NETWORK"
-);
-
-console.log(
-  "LIVE COMMUNITY"
-);
-
-console.log(
-  "Version 3.0"
-);
-
-console.log(
-  "Phone-based caller IDs enabled."
-);
-
-console.log(
-  "Caller records are NOT deleted."
-);
-
-console.log(
-  "=========================================="
-);
+  console.log(
+    "=========================================="
+  );
 
 
 </script>
